@@ -127,8 +127,14 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 
 	@Override
 	public SeasonDivision addSeasonDivision(Season season, Division division, int divisionPosition) {
+		// Add a field called "divisions" to the season object that will be an array of objects containing
+		// division IDs and positions.
+		
+		JsonDocument seasonJson = bucket.get("ssn_" + season.getSeasonNumber());
+		//seasonJson.
+		
 		// TODO Auto-generated method stub
-		return null;
+		return domainObjectFactory.createSeasonDivision(season, division, divisionPosition);
 	}
 
 	@Override
