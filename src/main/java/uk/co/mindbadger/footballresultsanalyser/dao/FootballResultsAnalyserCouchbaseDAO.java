@@ -13,6 +13,7 @@ import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
 import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.JsonLongDocument;
+import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
 
 import uk.co.mindbadger.footballresultsanalyser.domain.Division;
@@ -25,6 +26,8 @@ import uk.co.mindbadger.footballresultsanalyser.domain.Team;
 
 public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnalyserDAO {
 	Logger logger = Logger.getLogger(FootballResultsAnalyserCouchbaseDAO.class);
+
+	private String bucketName = "footballTest";
 	
 	private DomainObjectFactory domainObjectFactory;
 	private Cluster cluster;
@@ -32,9 +35,13 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	
 	@Override
 	public Season addSeason(Integer seasonNumber) {
+		
+		JsonArray divisions = JsonArray.empty();
+		
 		JsonObject season = JsonObject.empty()
 				.put("type", "season")
-				.put("seasonNumber", seasonNumber);
+				.put("seasonNumber", seasonNumber)
+				.put("divisions", divisions);
 		
 		JsonDocument doc = JsonDocument.create("ssn_" + seasonNumber.toString(), season);
 		JsonDocument response = bucket.upsert(doc);
@@ -127,20 +134,81 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 
 	@Override
 	public SeasonDivision addSeasonDivision(Season season, Division division, int divisionPosition) {
-		// Add a field called "divisions" to the season object that will be an array of objects containing
-		// division IDs and positions.
-		
 		JsonDocument seasonJson = bucket.get("ssn_" + season.getSeasonNumber());
-		//seasonJson.
 		
-		// TODO Auto-generated method stub
+		if (seasonJson == null) throw new IllegalArgumentException("Season " + season + " does not exist");
+		
+		JsonArray divisions = seasonJson.content().getArray("divisions");
+		
+		if (divisions == null) {
+			divisions = JsonArray.empty();
+		}
+		
+		boolean found = false;
+		for (Object object : divisions) {
+			JsonObject jsonObject = (JsonObject) object;
+			
+			String divisionId = jsonObject.getString("id");
+			
+			if (division.getDivisionId().equals(divisionId)) {
+				found = true;
+				jsonObject.put ("position", divisionPosition);
+			}
+		}
+		
+		if (!found) {
+			JsonArray teams = JsonArray.empty();
+			
+			JsonObject newDivision = JsonObject.empty()
+					.put("id", division.getDivisionId())
+					.put("position", divisionPosition)
+					.put("teams", teams);
+			
+			divisions.add(newDivision);
+		}
+		
+		bucket.upsert(seasonJson);
+		
 		return domainObjectFactory.createSeasonDivision(season, division, divisionPosition);
 	}
 
 	@Override
 	public SeasonDivisionTeam addSeasonDivisionTeam(SeasonDivision seasonDivision, Team team) {
-		// TODO Auto-generated method stub
-		return null;
+		JsonDocument seasonJson = bucket.get("ssn_" + seasonDivision.getSeason().getSeasonNumber());
+		
+		if (seasonJson == null) throw new IllegalArgumentException("Season " + seasonDivision.getSeason().getSeasonNumber() + " does not exist");
+
+		JsonArray divisions = seasonJson.content().getArray("divisions");
+		
+		boolean found = false;
+		for (Object object : divisions) {
+			JsonObject jsonObject = (JsonObject) object;
+			
+			String divisionId = jsonObject.getString("id");
+			
+			if (seasonDivision.getDivision().getDivisionId().equals(divisionId)) {
+				found = true;
+				
+				JsonArray teams = jsonObject.getArray("teams");
+				
+				boolean teamFound = false;
+				for (Object teamObject : teams) {
+					String teamId = (String) object;
+					
+					if (team.getTeamId().equals(teamId)) {
+						teamFound = true;
+					}
+				}
+				
+				if (!teamFound) {
+					teams.add(team.getTeamId());
+				}
+			}
+		}
+
+		if (!found) throw new IllegalArgumentException ("Division " + seasonDivision.getDivision().getDivisionId() + " does not exist");
+		
+		return domainObjectFactory.createSeasonDivisionTeam(seasonDivision, team);
 	}
 
 	@Override
@@ -242,7 +310,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	@Override
 	public void startSession() {
 		cluster = CouchbaseCluster.create();
-		bucket = cluster.openBucket("football");
+		bucket = cluster.openBucket(bucketName);
 	}
 	
 	@Override
@@ -256,5 +324,13 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 
 	public void setDomainObjectFactory(DomainObjectFactory domainObjectFactory) {
 		this.domainObjectFactory = domainObjectFactory;
+	}
+
+	public String getBucketName() {
+		return bucketName;
+	}
+
+	public void setBucketName(String bucketName) {
+		this.bucketName = bucketName;
 	}
 }
