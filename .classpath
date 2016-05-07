@@ -6,9 +6,9 @@
   <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.7"/>
   <classpathentry kind="var" path="M2_REPO/junit/junit/4.8.1/junit-4.8.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/org/mockito/mockito-all/1.8.4/mockito-all-1.8.4.jar"/>
-  <classpathentry kind="var" path="M2_REPO/com/couchbase/client/java-client/2.1.5/java-client-2.1.5.jar"/>
-  <classpathentry kind="var" path="M2_REPO/com/couchbase/client/core-io/1.1.5/core-io-1.1.5.jar"/>
-  <classpathentry kind="var" path="M2_REPO/io/reactivex/rxjava/1.0.4/rxjava-1.0.4.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/couchbase/client/java-client/2.2.6/java-client-2.2.6.jar"/>
+  <classpathentry kind="var" path="M2_REPO/com/couchbase/client/core-io/1.2.7/core-io-1.2.7.jar"/>
+  <classpathentry kind="var" path="M2_REPO/io/reactivex/rxjava/1.0.17/rxjava-1.0.17.jar"/>
   <classpathentry kind="var" path="M2_REPO/cglib/cglib/2.2.2/cglib-2.2.2.jar"/>
   <classpathentry kind="var" path="M2_REPO/asm/asm/3.3.1/asm-3.3.1.jar"/>
   <classpathentry kind="var" path="M2_REPO/log4j/log4j/1.2.17/log4j-1.2.17.jar"/>
