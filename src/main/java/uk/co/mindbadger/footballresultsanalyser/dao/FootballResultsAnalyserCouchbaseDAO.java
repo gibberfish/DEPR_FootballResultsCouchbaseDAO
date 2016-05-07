@@ -66,6 +66,24 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		return domainObjectFactory.createSeason(seasonNumber);
 	}
 	
+	@Override
+	public List<Season> getSeasons() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Season getSeason(Integer arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public Set<SeasonDivision> getDivisionsForSeason(Season arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/* ****************** DIVISION ****************** */
 	
 	private Division mapJsonToDivision (JsonObject jsonDivision) {
@@ -95,10 +113,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		JsonDocument response = bucket.upsert(doc);
 		
 		return mapJsonToDivision(doc.content());
-		
-//		Division divisionObject = domainObjectFactory.createDivision(divisionName);
-//		divisionObject.setDivisionId(generateIdString);
-//		return divisionObject;
 	}
 	
 	@Override
@@ -122,56 +136,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		
 		// TODO Auto-generated method stub
 		return null;
-//		ArrayList<AsyncViewRow> results = getView ("_design/season", "by_id");
-//		
-//		for (AsyncViewRow row : results) {
-//			System.out.println("ROW: " + row.document());
-//		}
-		
 	}
-	
-//	private ArrayList<AsyncViewRow> getView(String designDoc, String view) {
-//		final ArrayList<AsyncViewRow> result = new ArrayList<AsyncViewRow>();
-//		final CountDownLatch latch = new CountDownLatch(1);
-//		System.out.println("METHOD START");
-//		
-//		bucket.async().query(
-//				ViewQuery.from(designDoc, view).limit(20).stale(Stale.FALSE))
-//		.doOnNext(new Action1<AsyncViewResult>() {
-//			@Override
-//			public void call(AsyncViewResult viewResult) {
-//				if (!viewResult.success()) {
-//					System.out.println(viewResult.error());
-//				} else {
-//					System.out.println("Query is running!");
-//				}
-//			}
-//		}).flatMap(new Func1<AsyncViewResult, Observable<AsyncViewRow>>() {
-//			@Override
-//			public Observable<AsyncViewRow> call(AsyncViewResult viewResult) {
-//				return viewResult.rows();
-//			}
-//		}).subscribe(new Subscriber<AsyncViewRow>() {
-//			@Override
-//			public void onCompleted() {
-//				latch.countDown();
-//			}
-//			@Override
-//			public void onError(Throwable throwable) {
-//				System.err.println("Whoops: " + throwable.getMessage());
-//			}
-//			@Override
-//			public void onNext(AsyncViewRow viewRow) {
-//				result.add(viewRow);
-//			}
-//		});
-//		try {
-//			latch.await();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		return result;
-//	}
 	
 	/* ****************** TEAM ****************** */
 	
@@ -198,6 +163,18 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		Team teamObject = domainObjectFactory.createTeam(teamName);
 		teamObject.setTeamId(generatedIdString);
 		return teamObject;
+	}
+
+	@Override
+	public Team getTeam(String arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Map<String, Team> getAllTeams() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/* ****************** FIXTURE ****************** */
@@ -255,6 +232,42 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		return fixtureObject;
 	}
 
+	@Override
+	public Fixture getFixture(Season arg0, Division arg1, Team arg2, Team arg3) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Fixture> getFixtures() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Fixture> getFixturesForDivisionInSeason(SeasonDivision arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Fixture> getFixturesForTeamInDivisionInSeason(Season arg0, Division arg1, Team arg2) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Fixture> getFixturesWithNoFixtureDate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Fixture> getUnplayedFixturesBeforeToday() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/* ****************** SEASON DIVISION ****************** */
 	
 	@Override
@@ -295,6 +308,24 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		bucket.upsert(seasonJson);
 		
 		return domainObjectFactory.createSeasonDivision(season, division, divisionPosition);
+	}
+	
+	@Override
+	public SeasonDivision getSeasonDivision(Season arg0, Division arg1) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Set<SeasonDivisionTeam> getTeamsForDivisionInSeason(SeasonDivision arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	@Override
+	public SeasonDivision getSeasonDivision(String arg0) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 	/* ****************** SEASON DIVISION TEAM ****************** */
@@ -339,92 +370,9 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		
 		return domainObjectFactory.createSeasonDivisionTeam(seasonDivision, team);
 	}
-
 	
-	@Override
-	public Map<String, Team> getAllTeams() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Set<SeasonDivision> getDivisionsForSeason(Season arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Fixture getFixture(Season arg0, Division arg1, Team arg2, Team arg3) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Fixture> getFixtures() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Fixture> getFixturesForDivisionInSeason(SeasonDivision arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Fixture> getFixturesForTeamInDivisionInSeason(Season arg0, Division arg1, Team arg2) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Fixture> getFixturesWithNoFixtureDate() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Season getSeason(Integer arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public SeasonDivision getSeasonDivision(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public SeasonDivision getSeasonDivision(Season arg0, Division arg1) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Season> getSeasons() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Team getTeam(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Set<SeasonDivisionTeam> getTeamsForDivisionInSeason(SeasonDivision arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Fixture> getUnplayedFixturesBeforeToday() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+	/* ****************** UTILS, GETTERS & SETTERS ****************** */
+	
 	@Override
 	public void startSession() {
 		cluster = CouchbaseCluster.create();
