@@ -3,6 +3,7 @@ package uk.co.mindbadger.footballresultsanalyser.dao;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -77,7 +78,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		ViewResult result = bucket.query(ViewQuery.from("season", "by_id").stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
-			System.out.println("Fot a season row : " + row);
 			JsonObject seasonRow = (JsonObject) row.value();
 			seasons.add(mapJsonToSeason(seasonRow));
 		}
@@ -96,17 +96,19 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	
 	private Division mapJsonToDivision (JsonObject jsonDivision) {
 		Division divisionObject = domainObjectFactory.createDivision(jsonDivision.getString("divisionName"));
-		divisionObject.setDivisionId(jsonDivision.getString("divisionId"));
+		Long divisionId = jsonDivision.getLong("divisionId");
+		divisionObject.setDivisionId(divisionId.toString());
 		return divisionObject;
 	}
 	
 	@Override
 	public Division addDivision(String divisionName) {
+		System.out.println("addDivision: " + divisionName);
 		JsonLongDocument newIdLongDoc = null;
 		try {
 			newIdLongDoc = bucket.counter("divisionId", +1);
 		} catch (Exception e) {
-			newIdLongDoc = JsonLongDocument.create("divisionId");
+			newIdLongDoc = JsonLongDocument.create("divisionId", 0L);
 			bucket.insert(newIdLongDoc);
 		}
 		Long newId = newIdLongDoc.content();
@@ -117,9 +119,11 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 				.put("divisionName", divisionName);
 		
 		String generateIdString = "div_" + newId;
+		System.out.println("New ID: " + generateIdString);
 		JsonDocument doc = JsonDocument.create(generateIdString, division);
+		System.out.println("Created new doc");
 		JsonDocument response = bucket.upsert(doc);
-		
+		System.out.println("Upserted new doc");
 		return mapJsonToDivision(doc.content());
 	}
 	
@@ -128,22 +132,22 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		String generateIdString = "div_" + divisionId;
 		JsonDocument doc = bucket.get(generateIdString);
 		
-		return mapJsonToDivision(doc.content());
+		return (doc == null ? null : mapJsonToDivision(doc.content()));
 	}
 	
 	@Override
 	public Map<String, Division> getAllDivisions() {
+		Map<String, Division> divisions = new HashMap<String, Division> ();
 		
-		ViewResult result = bucket.query(ViewQuery.from("season", "by_id"));
+		ViewResult result = bucket.query(ViewQuery.from("division", "by_id").stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
 			JsonObject divisionRow = (JsonObject) row.value();
-			
-			System.out.println(row.toString());
+			Division division = mapJsonToDivision (divisionRow);
+			divisions.put(division.getDivisionId(), division);
 		}
 		
-		// TODO Auto-generated method stub
-		return null;
+		return divisions;
 	}
 	
 	/* ****************** TEAM ****************** */

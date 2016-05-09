@@ -1,51 +1,36 @@
 package uk.co.mindbadger.footballresultsanalyser.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.List;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.CouchbaseCluster;
-
-import uk.co.mindbadger.footballresultsanalyser.domain.Division;
 import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
 import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactoryImpl;
 import uk.co.mindbadger.footballresultsanalyser.domain.Season;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivision;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
-import uk.co.mindbadger.footballresultsanalyser.domain.Team;
 
-public class FootballResultsAnalyserCouchbaseDAOTest {
+public class FootballResultsAnalyserCouchbaseDAOSeasonTest {
 
 	private static final Integer SEASON_1 = 2001;
 	private static final Integer SEASON_2 = 2002;
 	private FootballResultsAnalyserCouchbaseDAO dao;
 	private DomainObjectFactory domainObjectFactory;
+	private static CouchbaseUtilities cbUtils = new CouchbaseUtilities ();
 	
 	private static final String TEST_BUCKET_NAME = "footballTest";
 	
 	@BeforeClass
 	public static void ensureWeAreCleanBeforeWeStart () {
-		flushBucket();
-	}
-	
-	@AfterClass
-	public static void cleanUpAtEnd () {
-		//flushBucket();
+		cbUtils.flushBucket(TEST_BUCKET_NAME);
 	}
 	
 	@Before
 	public void setup () {
-		//flushBucket();
-		
 		dao = new FootballResultsAnalyserCouchbaseDAO ();
 		domainObjectFactory = new DomainObjectFactoryImpl();
 		
@@ -58,14 +43,7 @@ public class FootballResultsAnalyserCouchbaseDAOTest {
 	@After
 	public void teardown () {
 		dao.closeSession();
-
-		Cluster cluster = CouchbaseCluster.create();
-		Bucket bucket = cluster.openBucket(TEST_BUCKET_NAME);
-		
-		if (bucket.get("ssn_"+SEASON_1) != null) bucket.remove("ssn_"+SEASON_1);
-		if (bucket.get("ssn_"+SEASON_2) != null) bucket.remove("ssn_"+SEASON_2);
-		
-		cluster.disconnect();		
+		cbUtils.tearDownSeasons(new Integer[] {SEASON_1, SEASON_2}, TEST_BUCKET_NAME);
 	}
 	
 	@Test
@@ -122,44 +100,5 @@ public class FootballResultsAnalyserCouchbaseDAOTest {
 		
 		// Then
 		assertNull (season);		
-	}
-
-	@Ignore
-	@Test
-	public void testDivisions () {
-		Division division = dao.addDivision("Premier");
-	}
-
-	@Ignore
-	@Test
-	public void testTeams () {
-		Team team = dao.addTeam("Portsmouth");
-	}
-
-	@Ignore
-	@Test
-	public void testSeasonDivisions () {
-		Season season = dao.addSeason(2001);
-		Division division = dao.addDivision("Premier");
-		SeasonDivision seasonDivision = dao.addSeasonDivision(season, division, 2);
-	}
-	
-	@Ignore
-	@Test
-	public void testDivisionTeams () {
-		Season season = dao.addSeason(2001);
-		Division division = dao.addDivision("Premier");
-		Team team = dao.addTeam("Portsmouth");
-		SeasonDivision seasonDivision = dao.addSeasonDivision(season, division, 2);
-		
-		SeasonDivisionTeam seasonDivisionTeam = dao.addSeasonDivisionTeam(seasonDivision, team);
-	}
-	
-	private static void flushBucket () {
-		System.out.println("Flushing Bucket");
-		Cluster cluster = CouchbaseCluster.create();
-		Bucket bucket = cluster.openBucket(TEST_BUCKET_NAME);
-		bucket.bucketManager().flush();
-		cluster.disconnect();		
 	}
 }
