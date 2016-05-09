@@ -50,6 +50,10 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	
 	/* ****************** SEASON ****************** */
 	
+	private Season mapJsonToSeason(JsonObject jsonSeason) {
+		return domainObjectFactory.createSeason(jsonSeason.getInt("seasonNumber"));
+	}
+	
 	@Override
 	public Season addSeason(Integer seasonNumber) {
 		
@@ -63,25 +67,29 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		JsonDocument doc = JsonDocument.create("ssn_" + seasonNumber.toString(), season);
 		JsonDocument response = bucket.upsert(doc);
 
-		return domainObjectFactory.createSeason(seasonNumber);
+		return mapJsonToSeason(doc.content());
 	}
 	
 	@Override
 	public List<Season> getSeasons() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Season> seasons = new ArrayList<Season> ();
+		
+		ViewResult result = bucket.query(ViewQuery.from("season", "by_id").stale(Stale.FALSE));
+		
+		for (ViewRow row : result.allRows()) {
+			System.out.println("Fot a season row : " + row);
+			JsonObject seasonRow = (JsonObject) row.value();
+			seasons.add(mapJsonToSeason(seasonRow));
+		}
+		
+		return seasons;
 	}
 
 	@Override
-	public Season getSeason(Integer arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-	
-	@Override
-	public Set<SeasonDivision> getDivisionsForSeason(Season arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public Season getSeason(Integer seasonNumber) {
+		JsonDocument jsonDocument = bucket.get("ssn_"+seasonNumber);
+		
+		return (jsonDocument == null ? null : mapJsonToSeason(jsonDocument.content()));
 	}
 
 	/* ****************** DIVISION ****************** */
@@ -311,6 +319,12 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	}
 	
 	@Override
+	public Set<SeasonDivision> getDivisionsForSeason(Season arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+    @Override
 	public SeasonDivision getSeasonDivision(Season arg0, Division arg1) {
 		// TODO Auto-generated method stub
 		return null;
