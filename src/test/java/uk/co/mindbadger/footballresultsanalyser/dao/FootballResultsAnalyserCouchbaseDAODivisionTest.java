@@ -1,28 +1,18 @@
 package uk.co.mindbadger.footballresultsanalyser.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
-import java.util.List;
 import java.util.Map;
 
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import com.couchbase.client.java.Bucket;
-import com.couchbase.client.java.Cluster;
-import com.couchbase.client.java.CouchbaseCluster;
 
 import uk.co.mindbadger.footballresultsanalyser.domain.Division;
 import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
 import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactoryImpl;
-import uk.co.mindbadger.footballresultsanalyser.domain.Season;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivision;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
-import uk.co.mindbadger.footballresultsanalyser.domain.Team;
 
 public class FootballResultsAnalyserCouchbaseDAODivisionTest {
 	private FootballResultsAnalyserCouchbaseDAO dao;
@@ -69,7 +59,7 @@ public class FootballResultsAnalyserCouchbaseDAODivisionTest {
 	}
 
 	@Test
-	public void shouldAddASeason() {
+	public void shouldAddADivision() {
 		// When
 		Division division = dao.addDivision(DIV_NAME_1);
 		Map<String, Division> divisions = dao.getAllDivisions();
@@ -88,7 +78,7 @@ public class FootballResultsAnalyserCouchbaseDAODivisionTest {
 	}
 
 	@Test
-	public void shouldAddTwoSeasons () {
+	public void shouldAddTwoDivisions () {
 		// When
 		Division division1 = dao.addDivision(DIV_NAME_1);
 		Division division2 = dao.addDivision(DIV_NAME_2);
@@ -113,7 +103,7 @@ public class FootballResultsAnalyserCouchbaseDAODivisionTest {
 	}
 
 	@Test
-	public void getShouldReturnNullIfNoSeasonExists () {
+	public void getShouldReturnNullIfNoDivisionExists () {
 		// When
 		Division division = dao.getDivision(divisionId1); 
 		

@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CountDownLatch;
 
 import org.apache.log4j.Logger;
 
@@ -18,20 +17,11 @@ import com.couchbase.client.java.document.JsonDocument;
 import com.couchbase.client.java.document.JsonLongDocument;
 import com.couchbase.client.java.document.json.JsonArray;
 import com.couchbase.client.java.document.json.JsonObject;
-import com.couchbase.client.java.query.N1qlQuery;
-import com.couchbase.client.java.query.N1qlQueryResult;
-import com.couchbase.client.java.query.N1qlQueryRow;
-import com.couchbase.client.java.view.AsyncViewResult;
-import com.couchbase.client.java.view.AsyncViewRow;
 import com.couchbase.client.java.view.Stale;
 import com.couchbase.client.java.view.ViewQuery;
 import com.couchbase.client.java.view.ViewResult;
 import com.couchbase.client.java.view.ViewRow;
 
-import rx.Observable;
-import rx.Subscriber;
-import rx.functions.Action1;
-import rx.functions.Func1;
 import uk.co.mindbadger.footballresultsanalyser.domain.Division;
 import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
 import uk.co.mindbadger.footballresultsanalyser.domain.Fixture;
@@ -66,7 +56,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 				.put("divisions", divisions);
 		
 		JsonDocument doc = JsonDocument.create("ssn_" + seasonNumber.toString(), season);
-		JsonDocument response = bucket.upsert(doc);
+		bucket.upsert(doc);
 
 		return mapJsonToSeason(doc.content());
 	}
@@ -103,7 +93,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	
 	@Override
 	public Division addDivision(String divisionName) {
-		System.out.println("addDivision: " + divisionName);
 		JsonLongDocument newIdLongDoc = null;
 		try {
 			newIdLongDoc = bucket.counter("divisionId", +1);
@@ -119,11 +108,8 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 				.put("divisionName", divisionName);
 		
 		String generateIdString = "div_" + newId;
-		System.out.println("New ID: " + generateIdString);
 		JsonDocument doc = JsonDocument.create(generateIdString, division);
-		System.out.println("Created new doc");
-		JsonDocument response = bucket.upsert(doc);
-		System.out.println("Upserted new doc");
+		bucket.upsert(doc);
 		return mapJsonToDivision(doc.content());
 	}
 	
@@ -152,13 +138,20 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	
 	/* ****************** TEAM ****************** */
 	
+	private Team mapJsonToTeam (JsonObject jsonDivision) {
+		Team teamObject = domainObjectFactory.createTeam(jsonDivision.getString("teamName"));
+		Long teamId = jsonDivision.getLong("teamId");
+		teamObject.setTeamId(teamId.toString());
+		return teamObject;
+	}
+
 	@Override
 	public Team addTeam(String teamName) {
 		JsonLongDocument newIdLongDoc = null;
 		try {
 			newIdLongDoc = bucket.counter("teamId", +1);
 		} catch (Exception e) {
-			newIdLongDoc = JsonLongDocument.create("teamId");
+			newIdLongDoc = JsonLongDocument.create("teamId", 0L);
 			bucket.insert(newIdLongDoc);
 		}
 		Long newId = newIdLongDoc.content();
@@ -170,23 +163,32 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		
 		String generatedIdString = "team_" + newId;
 		JsonDocument doc = JsonDocument.create(generatedIdString, team);
-		JsonDocument response = bucket.upsert(doc);
+		bucket.upsert(doc);
 
-		Team teamObject = domainObjectFactory.createTeam(teamName);
-		teamObject.setTeamId(generatedIdString);
-		return teamObject;
+		return mapJsonToTeam(doc.content());
 	}
 
 	@Override
-	public Team getTeam(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public Team getTeam(String teamId) {
+		String generateIdString = "team_" + teamId;
+		JsonDocument doc = bucket.get(generateIdString);
+		
+		return (doc == null ? null : mapJsonToTeam(doc.content()));
 	}
 
 	@Override
 	public Map<String, Team> getAllTeams() {
-		// TODO Auto-generated method stub
-		return null;
+		Map<String, Team> teams = new HashMap<String, Team> ();
+		
+		ViewResult result = bucket.query(ViewQuery.from("team", "by_id").stale(Stale.FALSE));
+		
+		for (ViewRow row : result.allRows()) {
+			JsonObject teamRow = (JsonObject) row.value();
+			Team team = mapJsonToTeam (teamRow);
+			teams.put(team.getTeamId(), team);
+		}
+		
+		return teams;
 	}
 
 	/* ****************** FIXTURE ****************** */
@@ -239,7 +241,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		}
 		
 		JsonDocument doc = JsonDocument.create(generatedIdString, fixture);
-		JsonDocument response = bucket.upsert(doc);
+		bucket.upsert(doc);
 		
 		return fixtureObject;
 	}

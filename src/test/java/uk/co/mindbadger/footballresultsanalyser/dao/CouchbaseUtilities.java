@@ -33,4 +33,14 @@ public class CouchbaseUtilities {
 		cluster.disconnect();		
 	}
 
+	public void tearDownTeams(String[] teams, String bucketName) {
+		Cluster cluster = CouchbaseCluster.create();
+		Bucket bucket = cluster.openBucket(bucketName);
+		
+		for (String teamId : teams) {
+			if (bucket.get("team_"+teamId) != null) bucket.remove("team_"+teamId);
+		}
+		cluster.disconnect();		
+	}
+
 }
