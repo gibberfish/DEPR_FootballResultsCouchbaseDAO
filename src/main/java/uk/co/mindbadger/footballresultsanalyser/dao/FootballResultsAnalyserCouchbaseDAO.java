@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -247,30 +248,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	}
 
 	@Override
-	public Fixture getFixture(Season arg0, Division arg1, Team arg2, Team arg3) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Fixture> getFixtures() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Fixture> getFixturesForDivisionInSeason(SeasonDivision arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Fixture> getFixturesForTeamInDivisionInSeason(Season arg0, Division arg1, Team arg2) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public List<Fixture> getFixturesWithNoFixtureDate() {
 		// TODO Auto-generated method stub
 		return null;
@@ -325,29 +302,34 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	}
 	
 	@Override
-	public Set<SeasonDivision> getDivisionsForSeason(Season arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public Set<SeasonDivision> getDivisionsForSeason(Season season) {
+		Set<SeasonDivision> seasonDivisions = new HashSet<SeasonDivision> ();
+		
+		JsonDocument jsonDocument = bucket.get("ssn_" + season.getSeasonNumber());
+		
+		JsonArray divisions = jsonDocument.content().getArray("divisions");
+		
+		for (Object divisionObject : divisions) {
+			JsonObject seasonDivisionObject = (JsonObject) divisionObject;
+			String divisionId = seasonDivisionObject.getString("id");
+			Integer position = seasonDivisionObject.getInt("position");
+			
+			Division division = getDivision(divisionId);
+			
+			SeasonDivision seasonDivision = domainObjectFactory.createSeasonDivision(season, division, position);
+			
+			seasonDivisions.add(seasonDivision);
+		}
+		
+		return seasonDivisions;
 	}
 	
-    @Override
-	public SeasonDivision getSeasonDivision(Season arg0, Division arg1) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	@Override
 	public Set<SeasonDivisionTeam> getTeamsForDivisionInSeason(SeasonDivision arg0) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 	
-	@Override
-	public SeasonDivision getSeasonDivision(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	/* ****************** SEASON DIVISION TEAM ****************** */
 	
 	@Override

@@ -4,7 +4,6 @@ public class SeasonDivisionImpl implements SeasonDivision {
 
 	private static final long serialVersionUID = 3890259602088787437L;
 
-	private String id;
 	private Season season;
 	private Division division;
 	private int divisionPosition;
@@ -17,11 +16,6 @@ public class SeasonDivisionImpl implements SeasonDivision {
 	@Override
 	public int getDivisionPosition() {
 		return divisionPosition;
-	}
-
-	@Override
-	public String getId() {
-		return id;
 	}
 
 	@Override
@@ -40,11 +34,6 @@ public class SeasonDivisionImpl implements SeasonDivision {
 	}
 
 	@Override
-	public void setId(String id) {
-		this.id = id;
-	}
-
-	@Override
 	public void setSeason(Season season) {
 		this.season = season;
 	}
@@ -60,4 +49,3 @@ public class SeasonDivisionImpl implements SeasonDivision {
 		}
 	}
 }
-
