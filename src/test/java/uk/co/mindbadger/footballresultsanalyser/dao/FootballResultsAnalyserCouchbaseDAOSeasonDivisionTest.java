@@ -2,7 +2,7 @@ package uk.co.mindbadger.footballresultsanalyser.dao;
 
 import static org.junit.Assert.*;
 
-import java.util.Set;
+import java.util.List;
 
 import org.junit.After;
 import org.junit.Before;
@@ -59,7 +59,7 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonDivisionTest {
 	public void shouldBeNoDivisionsForANewSeason () {
 		// When
 		Season season = dao.addSeason(SEASON_1);
-		Set<SeasonDivision> seasonDivisions = dao.getDivisionsForSeason(season);
+		List<SeasonDivision> seasonDivisions = dao.getDivisionsForSeason(season);
 		
 		// Then
 		assertEquals (0, seasonDivisions.size());		
@@ -72,7 +72,7 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonDivisionTest {
 		Division division = dao.addDivision(DIV_NAME_1);
 		
 		SeasonDivision seasonDivision = dao.addSeasonDivision(season, division, 3);
-		Set<SeasonDivision> seasonDivisions = dao.getDivisionsForSeason(season);
+		List<SeasonDivision> seasonDivisions = dao.getDivisionsForSeason(season);
 		
 		// Then (check return value)
 		assertEquals (SEASON_1, seasonDivision.getSeason().getSeasonNumber());
@@ -96,7 +96,7 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonDivisionTest {
 		
 		SeasonDivision seasonDivision1 = dao.addSeasonDivision(season, division1, 3);
 		SeasonDivision seasonDivision2 = dao.addSeasonDivision(season, division2, 2);
-		Set<SeasonDivision> seasonDivisions = dao.getDivisionsForSeason(season);
+		List<SeasonDivision> seasonDivisions = dao.getDivisionsForSeason(season);
 		
 		// Then (check return value)
 		assertEquals (SEASON_1, seasonDivision1.getSeason().getSeasonNumber());
@@ -110,12 +110,12 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonDivisionTest {
 		assertEquals (2, seasonDivisions.size());
 		SeasonDivision returnedSeasonDivision1 = (SeasonDivision)(seasonDivisions.toArray())[0];
 		assertEquals (SEASON_1, returnedSeasonDivision1.getSeason().getSeasonNumber());
-		assertEquals (division2.getDivisionId(), returnedSeasonDivision1.getDivision().getDivisionId());
-		assertEquals (2, returnedSeasonDivision1.getDivisionPosition());
+		assertEquals (division1.getDivisionId(), returnedSeasonDivision1.getDivision().getDivisionId());
+		assertEquals (3, returnedSeasonDivision1.getDivisionPosition());
 		
 		SeasonDivision returnedSeasonDivision2 = (SeasonDivision)(seasonDivisions.toArray())[1];
 		assertEquals (SEASON_1, returnedSeasonDivision2.getSeason().getSeasonNumber());
-		assertEquals (division1.getDivisionId(), returnedSeasonDivision2.getDivision().getDivisionId());
-		assertEquals (3, returnedSeasonDivision2.getDivisionPosition());
+		assertEquals (division2.getDivisionId(), returnedSeasonDivision2.getDivision().getDivisionId());
+		assertEquals (2, returnedSeasonDivision2.getDivisionPosition());
 	}
 }

@@ -4,10 +4,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -302,8 +300,8 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	}
 	
 	@Override
-	public Set<SeasonDivision> getDivisionsForSeason(Season season) {
-		Set<SeasonDivision> seasonDivisions = new HashSet<SeasonDivision> ();
+	public List<SeasonDivision> getDivisionsForSeason(Season season) {
+		List<SeasonDivision> seasonDivisions = new ArrayList<SeasonDivision> ();
 		
 		JsonDocument jsonDocument = bucket.get("ssn_" + season.getSeasonNumber());
 		
@@ -325,7 +323,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	}
 	
 	@Override
-	public Set<SeasonDivisionTeam> getTeamsForDivisionInSeason(SeasonDivision arg0) {
+	public List<SeasonDivisionTeam> getTeamsForDivisionInSeason(SeasonDivision arg0) {
 		// TODO Auto-generated method stub
 		return null;
 	}
