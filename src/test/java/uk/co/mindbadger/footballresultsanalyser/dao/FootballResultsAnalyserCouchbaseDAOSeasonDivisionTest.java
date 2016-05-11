@@ -118,4 +118,6 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonDivisionTest {
 		assertEquals (division2.getDivisionId(), returnedSeasonDivision2.getDivision().getDivisionId());
 		assertEquals (2, returnedSeasonDivision2.getDivisionPosition());
 	}
+	
+	//TODO Need to add some tests for cases where we pass in incomplete objects to the creates
 }

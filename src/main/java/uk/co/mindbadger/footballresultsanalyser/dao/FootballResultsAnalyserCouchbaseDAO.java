@@ -323,9 +323,33 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	}
 	
 	@Override
-	public List<SeasonDivisionTeam> getTeamsForDivisionInSeason(SeasonDivision arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public List<SeasonDivisionTeam> getTeamsForDivisionInSeason(SeasonDivision seasonDivision) {
+		List<SeasonDivisionTeam> seasonDivisionTeams = new ArrayList<SeasonDivisionTeam> ();
+		
+		JsonDocument jsonDocument = bucket.get("ssn_" + seasonDivision.getSeason().getSeasonNumber());
+		
+		JsonArray divisions = jsonDocument.content().getArray("divisions");
+		
+		for (Object divisionObject : divisions) {
+			JsonObject seasonDivisionObject = (JsonObject) divisionObject;
+			String divisionId = seasonDivisionObject.getString("id");
+			
+			if (seasonDivision.getDivision().getDivisionId().equals(divisionId)) {
+				JsonArray jsonTeamsArray = seasonDivisionObject.getArray("teams");
+				
+				for (Object teamObject : jsonTeamsArray) {
+					String teamId = (String) teamObject;
+					
+					Team team = getTeam(teamId);
+					
+					SeasonDivisionTeam seasonDivisionTeam = domainObjectFactory.createSeasonDivisionTeam(seasonDivision, team);
+					
+					seasonDivisionTeams.add(seasonDivisionTeam);
+				}
+			}
+		}
+		
+		return seasonDivisionTeams;
 	}
 	
 	/* ****************** SEASON DIVISION TEAM ****************** */
