@@ -137,7 +137,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 			fail ("An exception should be thrown when we don't supply a away team");
 		} catch (IllegalArgumentException e) {
 			// Then
-			assertEquals ("Please supply a away team when creating a fixture", e.getMessage());
+			assertEquals ("Please supply an away team when creating a fixture", e.getMessage());
 		}
 	}	
 

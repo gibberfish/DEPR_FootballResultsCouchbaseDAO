@@ -1,5 +1,6 @@
 package uk.co.mindbadger.footballresultsanalyser.dao;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -330,9 +331,51 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	
 	/* ****************** FIXTURE ****************** */
 	
+	private Fixture mapJsonToFixture(JsonObject jsonFixture) {
+		Season season = getSeason(jsonFixture.getInt("seasonNumber"));
+		Division division = getDivision(jsonFixture.getString("divisionId"));
+		Team homeTeam = getTeam(jsonFixture.getString("homeTeamId"));
+		Team awayTeam = getTeam(jsonFixture.getString("awayTeamId"));
+		
+		Fixture fixtureObject = domainObjectFactory.createFixture(season, homeTeam, awayTeam);
+		fixtureObject.setDivision(division);
+		
+		String fixtureDateString = jsonFixture.getString("fixtureDate");
+		SimpleDateFormat niceSdf = new SimpleDateFormat("dd/MM/yyyy");
+		Integer homeGoals = jsonFixture.getInt("homeGoals");
+		Integer awayGoals = jsonFixture.getInt("awayGoals");
+		
+		if (fixtureDateString != null) {
+			Calendar fixtureDate = Calendar.getInstance();
+			try {
+				fixtureDate.setTime(niceSdf.parse(fixtureDateString));
+				fixtureObject.setFixtureDate(fixtureDate);
+			} catch (ParseException e) {
+				e.printStackTrace();
+				throw new RuntimeException (e);
+			}
+		}
+		
+		if (homeGoals != null) {
+			fixtureObject.setHomeGoals(homeGoals);
+		}
+
+		if (awayGoals != null) {
+			fixtureObject.setHomeGoals(awayGoals);
+		}
+
+		return fixtureObject;
+	}
+	
 	@Override
 	public Fixture addFixture(Season season, Calendar fixtureDate, Division division, Team homeTeam, Team awayTeam, Integer homeGoals,
 			Integer awayGoals) {
+		
+		if (season == null) throw new IllegalArgumentException("Please supply a season when creating a fixture");
+		if (division == null) throw new IllegalArgumentException("Please supply a division when creating a fixture");
+		if (homeTeam == null) throw new IllegalArgumentException("Please supply a home team when creating a fixture");
+		if (awayTeam == null) throw new IllegalArgumentException("Please supply an away team when creating a fixture");
+		if (homeGoals != null && fixtureDate == null) throw new IllegalArgumentException("Please supply a fixture date team when creating a played fixture");
 		
 		JsonLongDocument newIdLongDoc = null;
 		try {
@@ -344,10 +387,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		Long newId = newIdLongDoc.content();
 		
 		String generatedIdString = "fix_" + newId;
-		
-		SimpleDateFormat niceSdf = new SimpleDateFormat("dd/MM/yyyy");
-		
-		String fixtureDateAsString = niceSdf.format(fixtureDate.getTime());
 		
 		JsonObject fixture = JsonObject.empty()
 				.put("type", "fixture")
@@ -362,7 +401,9 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		fixtureObject.setDivision(division);
 		fixtureObject.setFixtureId(generatedIdString);
 		
-		if (fixture != null) {
+		if (fixtureDate != null) {
+			SimpleDateFormat niceSdf = new SimpleDateFormat("dd/MM/yyyy");
+			String fixtureDateAsString = niceSdf.format(fixtureDate.getTime());
 			fixture.put("fixtureDate", fixtureDateAsString);
 			fixtureObject.setFixtureDate(fixtureDate);
 		}
@@ -384,9 +425,11 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	}
 
 	@Override
-	public Fixture getFixture(String arg0) {
-		// TODO Auto-generated method stub
-		return null;
+	public Fixture getFixture(String fixtureId) {
+		String generateIdString = "fixture_" + fixtureId;
+		JsonDocument doc = bucket.get(generateIdString);
+		
+		return (doc == null ? null : mapJsonToFixture(doc.content()));
 	}
 
 	@Override
