@@ -190,73 +190,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		return teams;
 	}
 
-	/* ****************** FIXTURE ****************** */
-	
-	@Override
-	public Fixture addFixture(Season season, Calendar fixtureDate, Division division, Team homeTeam, Team awayTeam, Integer homeGoals,
-			Integer awayGoals) {
-		
-		JsonLongDocument newIdLongDoc = null;
-		try {
-			newIdLongDoc = bucket.counter("fixtureId", +1);
-		} catch (Exception e) {
-			newIdLongDoc = JsonLongDocument.create("fixtureId");
-			bucket.insert(newIdLongDoc);
-		}
-		Long newId = newIdLongDoc.content();
-		
-		String generatedIdString = "fix_" + newId;
-		
-		SimpleDateFormat niceSdf = new SimpleDateFormat("dd/MM/yyyy");
-		
-		String fixtureDateAsString = niceSdf.format(fixtureDate.getTime());
-		
-		JsonObject fixture = JsonObject.empty()
-				.put("type", "fixture")
-				.put("fixtureId", newId)
-				.put("seasonNumber", season.getSeasonNumber())
-				.put("homeTeamId", homeTeam.getTeamId())
-				.put("awayTeamId", awayTeam.getTeamId())
-				.put("divisionId", division.getDivisionId())				
-				;
-		
-		Fixture fixtureObject = domainObjectFactory.createFixture(season, homeTeam, awayTeam);
-		fixtureObject.setDivision(division);
-		fixtureObject.setFixtureId(generatedIdString);
-		
-		if (fixture != null) {
-			fixture.put("fixtureDate", fixtureDateAsString);
-			fixtureObject.setFixtureDate(fixtureDate);
-		}
-		
-		if (homeGoals != null) {
-			fixture.put("homeGoals", homeGoals);
-			fixtureObject.setHomeGoals(homeGoals);
-		}
-		
-		if (awayGoals != null) {
-			fixture.put("awayGoals", awayGoals);
-			fixtureObject.setAwayGoals(awayGoals);
-		}
-		
-		JsonDocument doc = JsonDocument.create(generatedIdString, fixture);
-		bucket.upsert(doc);
-		
-		return fixtureObject;
-	}
-
-	@Override
-	public List<Fixture> getFixturesWithNoFixtureDate() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<Fixture> getUnplayedFixturesBeforeToday() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	/* ****************** SEASON DIVISION ****************** */
 	
 	@Override
@@ -322,36 +255,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		return seasonDivisions;
 	}
 	
-	@Override
-	public List<SeasonDivisionTeam> getTeamsForDivisionInSeason(SeasonDivision seasonDivision) {
-		List<SeasonDivisionTeam> seasonDivisionTeams = new ArrayList<SeasonDivisionTeam> ();
-		
-		JsonDocument jsonDocument = bucket.get("ssn_" + seasonDivision.getSeason().getSeasonNumber());
-		
-		JsonArray divisions = jsonDocument.content().getArray("divisions");
-		
-		for (Object divisionObject : divisions) {
-			JsonObject seasonDivisionObject = (JsonObject) divisionObject;
-			String divisionId = seasonDivisionObject.getString("id");
-			
-			if (seasonDivision.getDivision().getDivisionId().equals(divisionId)) {
-				JsonArray jsonTeamsArray = seasonDivisionObject.getArray("teams");
-				
-				for (Object teamObject : jsonTeamsArray) {
-					String teamId = (String) teamObject;
-					
-					Team team = getTeam(teamId);
-					
-					SeasonDivisionTeam seasonDivisionTeam = domainObjectFactory.createSeasonDivisionTeam(seasonDivision, team);
-					
-					seasonDivisionTeams.add(seasonDivisionTeam);
-				}
-			}
-		}
-		
-		return seasonDivisionTeams;
-	}
-	
 	/* ****************** SEASON DIVISION TEAM ****************** */
 	
 	@Override
@@ -395,6 +298,109 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		return domainObjectFactory.createSeasonDivisionTeam(seasonDivision, team);
 	}
 	
+	@Override
+	public List<SeasonDivisionTeam> getTeamsForDivisionInSeason(SeasonDivision seasonDivision) {
+		List<SeasonDivisionTeam> seasonDivisionTeams = new ArrayList<SeasonDivisionTeam> ();
+		
+		JsonDocument jsonDocument = bucket.get("ssn_" + seasonDivision.getSeason().getSeasonNumber());
+		
+		JsonArray divisions = jsonDocument.content().getArray("divisions");
+		
+		for (Object divisionObject : divisions) {
+			JsonObject seasonDivisionObject = (JsonObject) divisionObject;
+			String divisionId = seasonDivisionObject.getString("id");
+			
+			if (seasonDivision.getDivision().getDivisionId().equals(divisionId)) {
+				JsonArray jsonTeamsArray = seasonDivisionObject.getArray("teams");
+				
+				for (Object teamObject : jsonTeamsArray) {
+					String teamId = (String) teamObject;
+					
+					Team team = getTeam(teamId);
+					
+					SeasonDivisionTeam seasonDivisionTeam = domainObjectFactory.createSeasonDivisionTeam(seasonDivision, team);
+					
+					seasonDivisionTeams.add(seasonDivisionTeam);
+				}
+			}
+		}
+		
+		return seasonDivisionTeams;
+	}
+	
+	/* ****************** FIXTURE ****************** */
+	
+	@Override
+	public Fixture addFixture(Season season, Calendar fixtureDate, Division division, Team homeTeam, Team awayTeam, Integer homeGoals,
+			Integer awayGoals) {
+		
+		JsonLongDocument newIdLongDoc = null;
+		try {
+			newIdLongDoc = bucket.counter("fixtureId", +1);
+		} catch (Exception e) {
+			newIdLongDoc = JsonLongDocument.create("fixtureId");
+			bucket.insert(newIdLongDoc);
+		}
+		Long newId = newIdLongDoc.content();
+		
+		String generatedIdString = "fix_" + newId;
+		
+		SimpleDateFormat niceSdf = new SimpleDateFormat("dd/MM/yyyy");
+		
+		String fixtureDateAsString = niceSdf.format(fixtureDate.getTime());
+		
+		JsonObject fixture = JsonObject.empty()
+				.put("type", "fixture")
+				.put("fixtureId", newId)
+				.put("seasonNumber", season.getSeasonNumber())
+				.put("homeTeamId", homeTeam.getTeamId())
+				.put("awayTeamId", awayTeam.getTeamId())
+				.put("divisionId", division.getDivisionId())				
+				;
+		
+		Fixture fixtureObject = domainObjectFactory.createFixture(season, homeTeam, awayTeam);
+		fixtureObject.setDivision(division);
+		fixtureObject.setFixtureId(generatedIdString);
+		
+		if (fixture != null) {
+			fixture.put("fixtureDate", fixtureDateAsString);
+			fixtureObject.setFixtureDate(fixtureDate);
+		}
+		
+		if (homeGoals != null) {
+			fixture.put("homeGoals", homeGoals);
+			fixtureObject.setHomeGoals(homeGoals);
+		}
+		
+		if (awayGoals != null) {
+			fixture.put("awayGoals", awayGoals);
+			fixtureObject.setAwayGoals(awayGoals);
+		}
+		
+		JsonDocument doc = JsonDocument.create(generatedIdString, fixture);
+		bucket.upsert(doc);
+		
+		return fixtureObject;
+	}
+
+	@Override
+	public Fixture getFixture(String arg0) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Fixture> getFixturesWithNoFixtureDate() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public List<Fixture> getUnplayedFixturesBeforeToday() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 	/* ****************** UTILS, GETTERS & SETTERS ****************** */
 	
 	@Override
