@@ -68,7 +68,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		ViewResult result = bucket.query(ViewQuery.from("season", "by_id").stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
-			String key = (String) row.key();
+			String key = (String) row.id();
 			JsonDocument doc = bucket.get(key);
 			JsonObject seasonRow = doc.content();
 			//JsonObject seasonRow = (JsonObject) row.value();
@@ -131,7 +131,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		ViewResult result = bucket.query(ViewQuery.from("division", "by_id").stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
-			String key = (String) row.key();
+			String key = (String) row.id();
 			JsonDocument doc = bucket.get(key);
 			JsonObject divisionRow = doc.content();
 //			JsonObject divisionRow = (JsonObject) row.value();
@@ -189,7 +189,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		ViewResult result = bucket.query(ViewQuery.from("team", "by_id").stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
-			String key = (String) row.key();
+			String key = (String) row.id();
 			JsonDocument doc = bucket.get(key);
 			JsonObject teamRow = doc.content();
 //			JsonObject teamRow = (JsonObject) row.value();
