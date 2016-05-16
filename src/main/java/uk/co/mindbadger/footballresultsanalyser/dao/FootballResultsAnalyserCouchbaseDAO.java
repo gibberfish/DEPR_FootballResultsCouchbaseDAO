@@ -462,8 +462,26 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 
 	@Override
 	public List<Fixture> getUnplayedFixturesBeforeToday() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Fixture> fixtures = new ArrayList<Fixture> ();
+		
+		Calendar now = Calendar.getInstance();
+		String year = (new SimpleDateFormat("yyyy")).format(now.getTime());
+		String month = (new SimpleDateFormat("MM")).format(now.getTime());
+		String day = (new SimpleDateFormat("dd")).format(now.getTime());
+		
+		JsonArray endKey = JsonArray.from(year, month, day);
+		
+		ViewResult result = bucket.query(ViewQuery.from("fixture", "unplayed").stale(Stale.FALSE).endKey(endKey));
+		
+		for (ViewRow row : result.allRows()) {
+			String key = (String) row.id();
+			JsonDocument doc = bucket.get(key);
+			JsonObject fixtureRow = doc.content();
+			Fixture fixture = mapJsonToFixture (fixtureRow);
+			fixtures.add(fixture);
+		}
+		
+		return fixtures;
 	}
 
 	/* ****************** UTILS, GETTERS & SETTERS ****************** */
