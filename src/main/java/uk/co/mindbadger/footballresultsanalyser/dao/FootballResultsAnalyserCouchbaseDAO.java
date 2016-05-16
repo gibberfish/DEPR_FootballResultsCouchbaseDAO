@@ -345,8 +345,10 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		Division division = getDivision(jsonFixture.getString("divisionId"));
 		Team homeTeam = getTeam(jsonFixture.getString("homeTeamId"));
 		Team awayTeam = getTeam(jsonFixture.getString("awayTeamId"));
+		Integer fixtureId = jsonFixture.getInt("fixtureId");
 		
 		Fixture fixtureObject = domainObjectFactory.createFixture(season, homeTeam, awayTeam);
+		fixtureObject.setFixtureId("fix_" + fixtureId.toString());
 		fixtureObject.setDivision(division);
 		
 		String fixtureDateString = jsonFixture.getString("fixtureDate");
@@ -443,8 +445,19 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 
 	@Override
 	public List<Fixture> getFixturesWithNoFixtureDate() {
-		// TODO Auto-generated method stub
-		return null;
+		List<Fixture> fixtures = new ArrayList<Fixture> ();
+		
+		ViewResult result = bucket.query(ViewQuery.from("fixture", "no_fixture_date").stale(Stale.FALSE));
+		
+		for (ViewRow row : result.allRows()) {
+			String key = (String) row.id();
+			JsonDocument doc = bucket.get(key);
+			JsonObject fixtureRow = doc.content();
+			Fixture fixture = mapJsonToFixture (fixtureRow);
+			fixtures.add(fixture);
+		}
+		
+		return fixtures;
 	}
 
 	@Override

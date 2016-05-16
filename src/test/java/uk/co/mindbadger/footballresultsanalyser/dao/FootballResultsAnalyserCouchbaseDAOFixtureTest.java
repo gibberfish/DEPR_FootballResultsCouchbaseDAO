@@ -29,6 +29,8 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 	private static final String DIV_NAME_1 = "Premier";
 	private static final String TEAM_NAME_1 = "Porstmouth";
 	private static final String TEAM_NAME_2 = "Arsenal";
+	private static final String TEAM_NAME_3 = "Walsall";
+	private static final String TEAM_NAME_4 = "Bristol City";
 
 	private FootballResultsAnalyserCouchbaseDAO dao;
 	
@@ -36,6 +38,8 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 	private String divisionId2;
 	private String teamId1;
 	private String teamId2;
+	private String teamId3;
+	private String teamId4;
 
 	private DomainObjectFactory domainObjectFactory;
 	
@@ -62,7 +66,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		dao.closeSession();
 		cbUtils.tearDownSeasons(new Integer[] {SEASON_1, SEASON_2}, TEST_BUCKET_NAME);
 		cbUtils.tearDownDivisions(new String[] {divisionId1, divisionId2}, TEST_BUCKET_NAME);
-		cbUtils.tearDownTeams(new String[] {teamId1, teamId2}, TEST_BUCKET_NAME);
+		cbUtils.tearDownTeams(new String[] {teamId1, teamId2, teamId3, teamId4}, TEST_BUCKET_NAME);
 	}
 	
 	@Test
@@ -203,88 +207,31 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		dao.addFixture(season, fixtureDate, division, homeTeam, awayTeam, 2, 1);
 	}
 	
-	
-	
-	
-	
-	
-	@Ignore
 	@Test
-	public void shouldBeNoTeamsForANewDivisionsAddedToASeason () {
-		// When
+	public void shouldGetFixturesWithNoFixtureDate () {
+		// Given
 		Season season = dao.addSeason(SEASON_1);
 		Division division = dao.addDivision(DIV_NAME_1);
-		SeasonDivision seasonDivision = dao.addSeasonDivision(season, division, 3);
+		Team team1 = dao.addTeam(TEAM_NAME_1);
+		teamId1 = team1.getTeamId();
+		Team team2 = dao.addTeam(TEAM_NAME_2);
+		teamId2 = team1.getTeamId();
+		Team team3 = dao.addTeam(TEAM_NAME_3);
+		teamId3 = team1.getTeamId();
+		Team team4 = dao.addTeam(TEAM_NAME_4);
+		teamId4 = team1.getTeamId();
+		Calendar fixtureDate = Calendar.getInstance();
+		Fixture fixture1 = dao.addFixture(season, fixtureDate, division, team1, team2, 2, 1);
+		Fixture fixture2 = dao.addFixture(season, fixtureDate, division, team3, team4, 1, 3);
+		Fixture fixture3 = dao.addFixture(season, null, division, team2, team1, null, null);
+		Fixture fixture4 = dao.addFixture(season, null, division, team4, team3, null, null);
 		
-		List<SeasonDivisionTeam> seasonDivisionTeams = dao.getTeamsForDivisionInSeason(seasonDivision);
+		// When
+		List<Fixture> fixtures = dao.getFixturesWithNoFixtureDate();
 		
 		// Then
-		assertEquals (0, seasonDivisionTeams.size());		
-	}
-
-	@Ignore
-	@Test
-	public void shouldAddATeamToADivisionInASeason() {
-		// When
-		Season season = dao.addSeason(SEASON_1);
-		Division division = dao.addDivision(DIV_NAME_1);
-		SeasonDivision seasonDivision = dao.addSeasonDivision(season, division, 3);
-		Team team = dao.addTeam(TEAM_NAME_1);
-
-		SeasonDivisionTeam seasonDivisionTeam = dao.addSeasonDivisionTeam(seasonDivision, team);
-		
-		List<SeasonDivisionTeam> seasonDivisionTeams = dao.getTeamsForDivisionInSeason(seasonDivision);
-		
-		// Then (check return value)
-		assertEquals(SEASON_1, seasonDivisionTeam.getSeasonDivision().getSeason().getSeasonNumber());
-		assertEquals(division.getDivisionId(), seasonDivisionTeam.getSeasonDivision().getDivision().getDivisionId());
-		assertEquals(team.getTeamId(), seasonDivisionTeam.getTeam().getTeamId());
-		
-		// Then (get it from the list)
-		assertEquals (1, seasonDivisionTeams.size());
-		SeasonDivisionTeam returnedSeasonDivisionTeam = (SeasonDivisionTeam)(seasonDivisionTeams.get(0));
-		
-		assertEquals(SEASON_1, returnedSeasonDivisionTeam.getSeasonDivision().getSeason().getSeasonNumber());
-		assertEquals(division.getDivisionId(), returnedSeasonDivisionTeam.getSeasonDivision().getDivision().getDivisionId());
-		assertEquals(team.getTeamId(), returnedSeasonDivisionTeam.getTeam().getTeamId());
-	}
-
-	@Ignore
-	@Test
-	public void shouldAddTwoTeamsToADivisionInASeason () {
-		// When
-		Season season = dao.addSeason(SEASON_1);
-		Division division = dao.addDivision(DIV_NAME_1);
-		SeasonDivision seasonDivision = dao.addSeasonDivision(season, division, 3);
-		Team team1 = dao.addTeam(TEAM_NAME_1);
-		Team team2 = dao.addTeam(TEAM_NAME_2);
-
-		SeasonDivisionTeam seasonDivisionTeam1 = dao.addSeasonDivisionTeam(seasonDivision, team1);
-		SeasonDivisionTeam seasonDivisionTeam2 = dao.addSeasonDivisionTeam(seasonDivision, team2);
-		
-		List<SeasonDivisionTeam> seasonDivisionTeams = dao.getTeamsForDivisionInSeason(seasonDivision);
-		
-		// Then (check return value)
-		assertEquals(SEASON_1, seasonDivisionTeam1.getSeasonDivision().getSeason().getSeasonNumber());
-		assertEquals(division.getDivisionId(), seasonDivisionTeam1.getSeasonDivision().getDivision().getDivisionId());
-		assertEquals(team1.getTeamId(), seasonDivisionTeam1.getTeam().getTeamId());
-
-		assertEquals(SEASON_1, seasonDivisionTeam2.getSeasonDivision().getSeason().getSeasonNumber());
-		assertEquals(division.getDivisionId(), seasonDivisionTeam2.getSeasonDivision().getDivision().getDivisionId());
-		assertEquals(team2.getTeamId(), seasonDivisionTeam2.getTeam().getTeamId());
-
-		// Then (get it from the list)
-		assertEquals (2, seasonDivisionTeams.size());
-		
-		SeasonDivisionTeam returnedSeasonDivisionTeam1 = (SeasonDivisionTeam)(seasonDivisionTeams.get(0));
-		SeasonDivisionTeam returnedSeasonDivisionTeam2 = (SeasonDivisionTeam)(seasonDivisionTeams.get(1));
-		
-		assertEquals(SEASON_1, returnedSeasonDivisionTeam1.getSeasonDivision().getSeason().getSeasonNumber());
-		assertEquals(division.getDivisionId(), returnedSeasonDivisionTeam1.getSeasonDivision().getDivision().getDivisionId());
-		assertEquals(team1.getTeamId(), returnedSeasonDivisionTeam1.getTeam().getTeamId());
-		
-		assertEquals(SEASON_1, returnedSeasonDivisionTeam2.getSeasonDivision().getSeason().getSeasonNumber());
-		assertEquals(division.getDivisionId(), returnedSeasonDivisionTeam2.getSeasonDivision().getDivision().getDivisionId());
-		assertEquals(team2.getTeamId(), returnedSeasonDivisionTeam2.getTeam().getTeamId());
+		assertEquals (2, fixtures.size());
+		assertEquals (fixture3.getFixtureId(), fixtures.get(0).getFixtureId());
+		assertEquals (fixture4.getFixtureId(), fixtures.get(1).getFixtureId());
 	}
 }
