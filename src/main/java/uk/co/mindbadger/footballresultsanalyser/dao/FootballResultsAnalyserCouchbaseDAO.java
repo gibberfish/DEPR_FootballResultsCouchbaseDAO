@@ -348,7 +348,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		Integer fixtureId = jsonFixture.getInt("fixtureId");
 		
 		Fixture fixtureObject = domainObjectFactory.createFixture(season, homeTeam, awayTeam);
-		fixtureObject.setFixtureId("fix_" + fixtureId.toString());
+		fixtureObject.setFixtureId(fixtureId.toString());
 		fixtureObject.setDivision(division);
 		
 		String fixtureDateString = jsonFixture.getString("fixtureDate");
@@ -410,7 +410,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		
 		Fixture fixtureObject = domainObjectFactory.createFixture(season, homeTeam, awayTeam);
 		fixtureObject.setDivision(division);
-		fixtureObject.setFixtureId(generatedIdString);
+		fixtureObject.setFixtureId(newId.toString());
 		
 		if (fixtureDate != null) {
 			SimpleDateFormat niceSdf = new SimpleDateFormat("dd/MM/yyyy");

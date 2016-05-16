@@ -40,6 +40,13 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 	private String teamId2;
 	private String teamId3;
 	private String teamId4;
+	private String fixtureId1;
+	private String fixtureId2;
+	private String fixtureId3;
+	private String fixtureId4;
+	private String fixtureId5;
+	private String fixtureId6;
+	private String fixtureId7;
 
 	private DomainObjectFactory domainObjectFactory;
 	
@@ -67,6 +74,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		cbUtils.tearDownSeasons(new Integer[] {SEASON_1, SEASON_2}, TEST_BUCKET_NAME);
 		cbUtils.tearDownDivisions(new String[] {divisionId1, divisionId2}, TEST_BUCKET_NAME);
 		cbUtils.tearDownTeams(new String[] {teamId1, teamId2, teamId3, teamId4}, TEST_BUCKET_NAME);
+		cbUtils.tearDownFixtures(new String[] {fixtureId1, fixtureId2, fixtureId3, fixtureId4, fixtureId5, fixtureId6, fixtureId7}, TEST_BUCKET_NAME);
 	}
 	
 	@Test
@@ -175,6 +183,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		
 		// When
 		Fixture fixture = dao.addFixture(season, null, division, homeTeam, awayTeam, null, null);
+		fixtureId1 = fixture.getFixtureId();
 		Fixture retrievedFixture = dao.getFixture(fixture.getFixtureId());
 		
 		// Then
@@ -191,7 +200,8 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		Calendar fixtureDate = Calendar.getInstance();
 		
 		// When
-		dao.addFixture(season, fixtureDate, division, homeTeam, awayTeam, null, null);
+		Fixture fixture = dao.addFixture(season, fixtureDate, division, homeTeam, awayTeam, null, null);
+		fixtureId1 = fixture.getFixtureId();
 	}
 	
 	@Test
@@ -204,7 +214,8 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		Calendar fixtureDate = Calendar.getInstance();
 		
 		// When
-		dao.addFixture(season, fixtureDate, division, homeTeam, awayTeam, 2, 1);
+		Fixture fixture = dao.addFixture(season, fixtureDate, division, homeTeam, awayTeam, 2, 1);
+		fixtureId1 = fixture.getFixtureId();
 	}
 	
 	@Test
@@ -222,9 +233,13 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		teamId4 = team1.getTeamId();
 		Calendar fixtureDate = Calendar.getInstance();
 		Fixture fixture1 = dao.addFixture(season, fixtureDate, division, team1, team2, 2, 1);
+		fixtureId1 = fixture1.getFixtureId();
 		Fixture fixture2 = dao.addFixture(season, fixtureDate, division, team3, team4, 1, 3);
+		fixtureId2 = fixture2.getFixtureId();
 		Fixture fixture3 = dao.addFixture(season, null, division, team2, team1, null, null);
+		fixtureId3 = fixture3.getFixtureId();
 		Fixture fixture4 = dao.addFixture(season, null, division, team4, team3, null, null);
+		fixtureId4 = fixture4.getFixtureId();
 		
 		// When
 		List<Fixture> fixtures = dao.getFixturesWithNoFixtureDate();
@@ -259,22 +274,29 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		Calendar fixtureDate3 = Calendar.getInstance();
 		fixtureDate3.set(Calendar.YEAR, 2070);
 		fixtureDate3.set(Calendar.MONTH, 4);
-		fixtureDate3.set(Calendar.DAY_OF_MONTH, 21);
+		fixtureDate3 .set(Calendar.DAY_OF_MONTH, 21);
 		Fixture fixture1 = dao.addFixture(season, fixtureDate1, division, team1, team2, 2, 1);
+		fixtureId1 = fixture1.getFixtureId();
 		Fixture fixture2 = dao.addFixture(season, fixtureDate1, division, team3, team4, null, null);
+		fixtureId2 = fixture2.getFixtureId();
 		Fixture fixture3 = dao.addFixture(season, null, division, team2, team1, null, null);
+		fixtureId3 = fixture3.getFixtureId();
 		Fixture fixture4 = dao.addFixture(season, null, division, team4, team3, null, null);
+		fixtureId4 = fixture4.getFixtureId();
 		Fixture fixture5 = dao.addFixture(season, null, division, team2, team3, null, null);
+		fixtureId5 = fixture5.getFixtureId();
 		Fixture fixture6 = dao.addFixture(season, fixtureDate2, division, team1, team4, null, null);
+		fixtureId6 = fixture6.getFixtureId();
 		Fixture fixture7 = dao.addFixture(season, fixtureDate3, division, team1, team4, null, null);
+		fixtureId7 = fixture7.getFixtureId();
 		
 		// When
 		List<Fixture> fixtures = dao.getUnplayedFixturesBeforeToday();
 		
 		// Then
 		assertEquals (2, fixtures.size());
-		assertEquals (fixture2.getFixtureId(), fixtures.get(0).getFixtureId());
-		assertEquals (fixture6.getFixtureId(), fixtures.get(1).getFixtureId());
+		assertEquals (fixtureId2, fixtures.get(0).getFixtureId());
+		assertEquals (fixtureId6, fixtures.get(1).getFixtureId());
 	}
 
 }

@@ -43,4 +43,13 @@ public class CouchbaseUtilities {
 		cluster.disconnect();		
 	}
 
+	public void tearDownFixtures(String[] fixtures, String bucketName) {
+		Cluster cluster = CouchbaseCluster.create();
+		Bucket bucket = cluster.openBucket(bucketName);
+		
+		for (String fixtureId : fixtures) {
+			if (bucket.get("fix_"+fixtureId) != null) bucket.remove("fix_"+fixtureId);
+		}
+		cluster.disconnect();		
+	}
 }
