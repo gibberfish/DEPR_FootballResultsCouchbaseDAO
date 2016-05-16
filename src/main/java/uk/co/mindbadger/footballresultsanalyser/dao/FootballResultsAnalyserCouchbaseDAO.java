@@ -68,7 +68,10 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		ViewResult result = bucket.query(ViewQuery.from("season", "by_id").stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
-			JsonObject seasonRow = (JsonObject) row.value();
+			String key = (String) row.key();
+			JsonDocument doc = bucket.get(key);
+			JsonObject seasonRow = doc.content();
+			//JsonObject seasonRow = (JsonObject) row.value();
 			seasons.add(mapJsonToSeason(seasonRow));
 		}
 		
