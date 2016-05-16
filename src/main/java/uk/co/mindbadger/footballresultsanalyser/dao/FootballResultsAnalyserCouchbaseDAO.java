@@ -131,7 +131,10 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		ViewResult result = bucket.query(ViewQuery.from("division", "by_id").stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
-			JsonObject divisionRow = (JsonObject) row.value();
+			String key = (String) row.key();
+			JsonDocument doc = bucket.get(key);
+			JsonObject divisionRow = doc.content();
+//			JsonObject divisionRow = (JsonObject) row.value();
 			Division division = mapJsonToDivision (divisionRow);
 			divisions.put(division.getDivisionId(), division);
 		}
@@ -186,7 +189,10 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		ViewResult result = bucket.query(ViewQuery.from("team", "by_id").stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
-			JsonObject teamRow = (JsonObject) row.value();
+			String key = (String) row.key();
+			JsonDocument doc = bucket.get(key);
+			JsonObject teamRow = doc.content();
+//			JsonObject teamRow = (JsonObject) row.value();
 			Team team = mapJsonToTeam (teamRow);
 			teams.put(team.getTeamId(), team);
 		}
@@ -384,7 +390,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		try {
 			newIdLongDoc = bucket.counter("fixtureId", +1);
 		} catch (Exception e) {
-			newIdLongDoc = JsonLongDocument.create("fixtureId");
+			newIdLongDoc = JsonLongDocument.create("fixtureId", 0L);
 			bucket.insert(newIdLongDoc);
 		}
 		Long newId = newIdLongDoc.content();
