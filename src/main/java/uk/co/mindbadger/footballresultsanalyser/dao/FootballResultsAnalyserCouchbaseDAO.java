@@ -105,9 +105,38 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		divisionObject.setDivisionId(divisionId.toString());
 		return divisionObject;
 	}
+
+	private String generateCouchbaseDivisionKey (String divisionId) {
+		return "div_" + divisionId;
+	}
+
+	public Division getDivisionByName(String divisionName) {
+		Division division = null;
+		
+		ViewResult result = bucket.query(ViewQuery.from("division", "by_name").stale(Stale.FALSE).key(divisionName));
+		
+		for (ViewRow row : result.allRows()) {
+			String key = (String) row.id();
+			JsonDocument doc = bucket.get(key);
+			JsonObject divisionRow = doc.content();
+			division = mapJsonToDivision (divisionRow);
+		}
+		
+		return division;
+	}
+
+	@Override
+	public Division getDivision(String divisionId) {
+		JsonDocument doc = bucket.get(generateCouchbaseDivisionKey(divisionId));
+		if (doc == null) throw new IllegalArgumentException("Division " + divisionId + " does not exist");
+		return (doc == null ? null : mapJsonToDivision(doc.content()));
+	}
 	
 	@Override
 	public Division addDivision(String divisionName) {
+		Division existingDivision = getDivisionByName (divisionName);
+		if (existingDivision != null) return existingDivision;
+		
 		JsonLongDocument newIdLongDoc = null;
 		try {
 			newIdLongDoc = bucket.counter("divisionId", +1);
@@ -122,18 +151,9 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 				.put("divisionId", newId)
 				.put("divisionName", divisionName);
 		
-		String generateIdString = "div_" + newId;
-		JsonDocument doc = JsonDocument.create(generateIdString, division);
+		JsonDocument doc = JsonDocument.create(generateCouchbaseDivisionKey(newId.toString()), division);
 		bucket.upsert(doc);
 		return mapJsonToDivision(doc.content());
-	}
-	
-	@Override
-	public Division getDivision(String divisionId) {
-		String generateIdString = "div_" + divisionId;
-		JsonDocument doc = bucket.get(generateIdString);
-		
-		return (doc == null ? null : mapJsonToDivision(doc.content()));
 	}
 	
 	@Override

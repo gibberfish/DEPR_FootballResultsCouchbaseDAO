@@ -2,6 +2,7 @@ package uk.co.mindbadger.footballresultsanalyser.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.Map;
 
@@ -103,11 +104,36 @@ public class FootballResultsAnalyserCouchbaseDAODivisionTest {
 	}
 
 	@Test
-	public void getShouldReturnNullIfNoDivisionExists () {
+	public void shouldUpdateAnExistingDivision() {
 		// When
-		Division division = dao.getDivision(divisionId1); 
+		dao.addDivision(DIV_NAME_1);
+		Division division = dao.addDivision(DIV_NAME_1);
+		Map<String, Division> divisions = dao.getAllDivisions();
 		
-		// Then
-		assertNull (division);		
+		// Then (check return value)
+		assertEquals (DIV_NAME_1, division.getDivisionName());
+		divisionId1 = division.getDivisionId();
+		
+		// Then (get it from the list)
+		assertEquals (1, divisions.size());
+		assertEquals (DIV_NAME_1, divisions.get(divisionId1).getDivisionName());
+		assertEquals (divisionId1, divisions.get(divisionId1).getDivisionId());
+		
+		// Then (get it by key)
+		assertEquals (DIV_NAME_1, dao.getDivision(divisionId1).getDivisionName());
 	}
+
+	@Test
+	public void shouldThrowAnExceptionWhenTryingToGetANonExistentSeason () {
+		// Given
+
+		try {
+			// When
+			dao.getDivision(divisionId1);
+			fail ("An exception should be thrown if a division does not exist");
+		} catch (IllegalArgumentException e) {
+			// Then
+			assertEquals ("Division "+divisionId1+" does not exist", e.getMessage());
+		}
+	}	
 }
