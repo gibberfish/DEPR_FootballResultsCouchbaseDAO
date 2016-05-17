@@ -299,4 +299,50 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		assertEquals (fixtureId6, fixtures.get(1).getFixtureId());
 	}
 
+	@Test
+	public void shouldGetAllFixtures () {
+		// Given
+		Season season = dao.addSeason(SEASON_1);
+		Division division = dao.addDivision(DIV_NAME_1);
+		Team team1 = dao.addTeam(TEAM_NAME_1);
+		teamId1 = team1.getTeamId();
+		Team team2 = dao.addTeam(TEAM_NAME_2);
+		teamId2 = team1.getTeamId();
+		Team team3 = dao.addTeam(TEAM_NAME_3);
+		teamId3 = team1.getTeamId();
+		Team team4 = dao.addTeam(TEAM_NAME_4);
+		teamId4 = team1.getTeamId();
+		Calendar fixtureDate1 = Calendar.getInstance();
+		fixtureDate1.set(Calendar.YEAR, 2003);
+		fixtureDate1.set(Calendar.MONTH, 4);
+		fixtureDate1.set(Calendar.DAY_OF_MONTH, 15);
+		Calendar fixtureDate2 = Calendar.getInstance();
+		fixtureDate2.set(Calendar.YEAR, 2003);
+		fixtureDate2.set(Calendar.MONTH, 4);
+		fixtureDate2.set(Calendar.DAY_OF_MONTH, 21);
+		Calendar fixtureDate3 = Calendar.getInstance();
+		fixtureDate3.set(Calendar.YEAR, 2070);
+		fixtureDate3.set(Calendar.MONTH, 4);
+		fixtureDate3 .set(Calendar.DAY_OF_MONTH, 21);
+		Fixture fixture1 = dao.addFixture(season, fixtureDate1, division, team1, team2, 2, 1);
+		fixtureId1 = fixture1.getFixtureId();
+		Fixture fixture2 = dao.addFixture(season, fixtureDate1, division, team3, team4, null, null);
+		fixtureId2 = fixture2.getFixtureId();
+		Fixture fixture3 = dao.addFixture(season, null, division, team2, team1, null, null);
+		fixtureId3 = fixture3.getFixtureId();
+		Fixture fixture4 = dao.addFixture(season, null, division, team4, team3, null, null);
+		fixtureId4 = fixture4.getFixtureId();
+		Fixture fixture5 = dao.addFixture(season, null, division, team2, team3, null, null);
+		fixtureId5 = fixture5.getFixtureId();
+		Fixture fixture6 = dao.addFixture(season, fixtureDate2, division, team1, team4, null, null);
+		fixtureId6 = fixture6.getFixtureId();
+		Fixture fixture7 = dao.addFixture(season, fixtureDate3, division, team1, team4, null, null);
+		fixtureId7 = fixture7.getFixtureId();
+		
+		// When
+		List<Fixture> fixtures = dao.getFixtures();
+		
+		// Then
+		assertEquals (7, fixtures.size());
+	}
 }

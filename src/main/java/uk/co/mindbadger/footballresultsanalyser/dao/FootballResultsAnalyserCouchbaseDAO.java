@@ -461,6 +461,24 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	}
 
 	@Override
+	public List<Fixture> getFixtures() {
+		List<Fixture> fixtures = new ArrayList<Fixture> ();
+		
+		ViewResult result = bucket.query(ViewQuery.from("fixture", "by_id").stale(Stale.FALSE));
+		
+		for (ViewRow row : result.allRows()) {
+			String key = (String) row.id();
+			JsonDocument doc = bucket.get(key);
+			JsonObject fixtureRow = doc.content();
+			Fixture fixture = mapJsonToFixture (fixtureRow);
+			fixtures.add(fixture);
+		}
+		
+		return fixtures;
+	}
+
+	
+	@Override
 	public List<Fixture> getUnplayedFixturesBeforeToday() {
 		List<Fixture> fixtures = new ArrayList<Fixture> ();
 		
