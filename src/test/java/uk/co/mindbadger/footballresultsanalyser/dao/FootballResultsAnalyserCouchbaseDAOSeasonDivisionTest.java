@@ -88,6 +88,29 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonDivisionTest {
 	}
 
 	@Test
+	public void shouldUpdateAnExistingDivisionInASeason() {
+		// When
+		Season season = dao.addSeason(SEASON_1);
+		Division division = dao.addDivision(DIV_NAME_1);
+		
+		dao.addSeasonDivision(season, division, 1);
+		SeasonDivision seasonDivision = dao.addSeasonDivision(season, division, 3);
+		List<SeasonDivision> seasonDivisions = dao.getDivisionsForSeason(season);
+		
+		// Then (check return value)
+		assertEquals (SEASON_1, seasonDivision.getSeason().getSeasonNumber());
+		assertEquals (division.getDivisionId(), seasonDivision.getDivision().getDivisionId());
+		assertEquals (3, seasonDivision.getDivisionPosition());
+		
+		// Then (get it from the list)
+		assertEquals (1, seasonDivisions.size());
+		SeasonDivision returnedSeasonDivision = (SeasonDivision)(seasonDivisions.toArray())[0];
+		assertEquals (SEASON_1, returnedSeasonDivision.getSeason().getSeasonNumber());
+		assertEquals (division.getDivisionId(), returnedSeasonDivision.getDivision().getDivisionId());
+		assertEquals (3, returnedSeasonDivision.getDivisionPosition());
+	}
+
+	@Test
 	public void shouldAddTwoDivisionsToASeason () {
 		// When
 		Season season = dao.addSeason(SEASON_1);

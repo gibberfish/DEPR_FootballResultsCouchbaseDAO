@@ -320,7 +320,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	
 	@Override
 	public SeasonDivisionTeam addSeasonDivisionTeam(SeasonDivision seasonDivision, Team team) {
-		JsonDocument seasonJson = bucket.get("ssn_" + seasonDivision.getSeason().getSeasonNumber());
+		JsonDocument seasonJson = bucket.get(generateCouchbaseSeasonKey(seasonDivision.getSeason().getSeasonNumber()));
 		
 		if (seasonJson == null) throw new IllegalArgumentException("Season " + seasonDivision.getSeason().getSeasonNumber() + " does not exist");
 
@@ -363,7 +363,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	public List<SeasonDivisionTeam> getTeamsForDivisionInSeason(SeasonDivision seasonDivision) {
 		List<SeasonDivisionTeam> seasonDivisionTeams = new ArrayList<SeasonDivisionTeam> ();
 		
-		JsonDocument jsonDocument = bucket.get("ssn_" + seasonDivision.getSeason().getSeasonNumber());
+		JsonDocument jsonDocument = bucket.get(generateCouchbaseSeasonKey(seasonDivision.getSeason().getSeasonNumber()));
 		
 		JsonArray divisions = jsonDocument.content().getArray("divisions");
 		
