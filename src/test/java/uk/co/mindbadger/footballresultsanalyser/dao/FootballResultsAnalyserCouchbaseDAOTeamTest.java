@@ -2,6 +2,7 @@ package uk.co.mindbadger.footballresultsanalyser.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.Map;
 
@@ -103,11 +104,36 @@ public class FootballResultsAnalyserCouchbaseDAOTeamTest {
 	}
 
 	@Test
-	public void getShouldReturnNullIfNoTeamExists () {
+	public void shouldUpdateATeam() {
 		// When
-		Team team = dao.getTeam(teamId1); 
+		dao.addTeam(TEAM_NAME_1);
+		Team team = dao.addTeam(TEAM_NAME_1);
+		Map<String, Team> teams = dao.getAllTeams();
 		
-		// Then
-		assertNull (team);		
+		// Then (check return value)
+		assertEquals (TEAM_NAME_1, team.getTeamName());
+		teamId1 = team.getTeamId();
+		
+		// Then (get it from the list)
+		assertEquals (1, teams.size());
+		assertEquals (TEAM_NAME_1, teams.get(teamId1).getTeamName());
+		assertEquals (teamId1, teams.get(teamId1).getTeamId());
+		
+		// Then (get it by key)
+		assertEquals (TEAM_NAME_1, dao.getTeam(teamId1).getTeamName());
 	}
+
+	@Test
+	public void shouldThrowAnExceptionWhenTryingToGetANonExistentSeason () {
+		// Given
+
+		try {
+			// When
+			dao.getTeam(teamId1);
+			fail ("An exception should be thrown if a division does not exist");
+		} catch (IllegalArgumentException e) {
+			// Then
+			assertEquals ("Team "+teamId1+" does not exist", e.getMessage());
+		}
+	}	
 }

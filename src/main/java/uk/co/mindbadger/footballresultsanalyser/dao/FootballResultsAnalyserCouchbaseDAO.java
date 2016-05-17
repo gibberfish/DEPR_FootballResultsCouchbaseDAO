@@ -183,8 +183,30 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		return teamObject;
 	}
 
+	private String generateCouchbaseTeamKey (String teamId) {
+		return "team_" + teamId;
+	}
+
+	public Team getTeamByName(String teamName) {
+		Team team = null;
+		
+		ViewResult result = bucket.query(ViewQuery.from("team", "by_name").stale(Stale.FALSE).key(teamName));
+		
+		for (ViewRow row : result.allRows()) {
+			String key = (String) row.id();
+			JsonDocument doc = bucket.get(key);
+			JsonObject teamRow = doc.content();
+			team = mapJsonToTeam (teamRow);
+		}
+		
+		return team;
+	}
+
 	@Override
 	public Team addTeam(String teamName) {
+		Team existingTeam = getTeamByName(teamName);
+		if (existingTeam != null) return existingTeam;
+		
 		JsonLongDocument newIdLongDoc = null;
 		try {
 			newIdLongDoc = bucket.counter("teamId", +1);
@@ -199,8 +221,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 				.put("teamId", newId)
 				.put("teamName", teamName);
 		
-		String generatedIdString = "team_" + newId;
-		JsonDocument doc = JsonDocument.create(generatedIdString, team);
+		JsonDocument doc = JsonDocument.create(generateCouchbaseTeamKey(newId.toString()), team);
 		bucket.upsert(doc);
 
 		return mapJsonToTeam(doc.content());
@@ -208,10 +229,9 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 
 	@Override
 	public Team getTeam(String teamId) {
-		String generateIdString = "team_" + teamId;
-		JsonDocument doc = bucket.get(generateIdString);
-		
-		return (doc == null ? null : mapJsonToTeam(doc.content()));
+		JsonDocument doc = bucket.get(generateCouchbaseTeamKey(teamId));
+		if (doc == null) throw new IllegalArgumentException("Team " + teamId + " does not exist");
+		return mapJsonToTeam(doc.content());
 	}
 
 	@Override
@@ -224,7 +244,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 			String key = (String) row.id();
 			JsonDocument doc = bucket.get(key);
 			JsonObject teamRow = doc.content();
-//			JsonObject teamRow = (JsonObject) row.value();
 			Team team = mapJsonToTeam (teamRow);
 			teams.put(team.getTeamId(), team);
 		}
