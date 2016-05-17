@@ -2,6 +2,7 @@ package uk.co.mindbadger.footballresultsanalyser.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.fail;
 
 import java.util.List;
 
@@ -56,6 +57,20 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonTest {
 	}
 
 	@Test
+	public void shouldThrowAnExceptionWhenTryingToGetANonExistentSeason () {
+		// Given
+
+		try {
+			// When
+			dao.getSeason(1766);
+			fail ("An exception should be thrown if a season does not exist");
+		} catch (IllegalArgumentException e) {
+			// Then
+			assertEquals ("Season 1766 does not exist", e.getMessage());
+		}
+	}	
+
+	@Test
 	public void shouldAddASeason() {
 		// When
 		Season season = dao.addSeason(SEASON_1);
@@ -94,11 +109,21 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonTest {
 	}
 
 	@Test
-	public void getShouldReturnNullIfNoSeasonExists () {
+	public void shouldUpdateAnExistingSeason() {
 		// When
-		Season season = dao.getSeason(SEASON_1); 
+		dao.addSeason(SEASON_1);
+		Season season = dao.addSeason(SEASON_1);
 		
-		// Then
-		assertNull (season);		
+		List<Season> seasons = dao.getSeasons();
+		
+		// Then (check return value)
+		assertEquals (SEASON_1, season.getSeasonNumber());
+		
+		// Then (get it from the list)
+		assertEquals (1, seasons.size());
+		assertEquals (SEASON_1, seasons.get(0).getSeasonNumber());
+		
+		// Then (get it by key)
+		assertEquals (SEASON_1, dao.getSeason(SEASON_1).getSeasonNumber());
 	}
 }

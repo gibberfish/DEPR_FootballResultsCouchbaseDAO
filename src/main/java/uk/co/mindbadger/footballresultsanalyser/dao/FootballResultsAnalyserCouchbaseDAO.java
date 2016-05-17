@@ -44,21 +44,40 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	private Season mapJsonToSeason(JsonObject jsonSeason) {
 		return domainObjectFactory.createSeason(jsonSeason.getInt("seasonNumber"));
 	}
+
+	private String generateCouchbaseSeasonKey (String seasonNumber) {
+		return "ssn_" + seasonNumber;
+	}
+
+	private String generateCouchbaseSeasonKey (Integer seasonNumber) {
+		return generateCouchbaseSeasonKey(seasonNumber.toString());
+	}
+	
+	@Override
+	public Season getSeason(Integer seasonNumber) {
+		JsonDocument jsonDocument = bucket.get(generateCouchbaseSeasonKey(seasonNumber));
+		if (jsonDocument == null) throw new IllegalArgumentException("Season " + seasonNumber + " does not exist");
+		return mapJsonToSeason(jsonDocument.content());
+	}
 	
 	@Override
 	public Season addSeason(Integer seasonNumber) {
-		
-		JsonArray divisions = JsonArray.empty();
-		
-		JsonObject season = JsonObject.empty()
-				.put("type", "season")
-				.put("seasonNumber", seasonNumber)
-				.put("divisions", divisions);
-		
-		JsonDocument doc = JsonDocument.create("ssn_" + seasonNumber.toString(), season);
-		bucket.upsert(doc);
-
-		return mapJsonToSeason(doc.content());
+		try {
+			Season existingSeason = getSeason (seasonNumber);
+			return existingSeason;
+		} catch (IllegalArgumentException e) {
+			JsonArray divisions = JsonArray.empty();
+			
+			JsonObject season = JsonObject.empty()
+					.put("type", "season")
+					.put("seasonNumber", seasonNumber)
+					.put("divisions", divisions);
+			
+			JsonDocument doc = JsonDocument.create(generateCouchbaseSeasonKey(seasonNumber), season);
+			bucket.upsert(doc);
+			
+			return mapJsonToSeason(doc.content());
+		}
 	}
 	
 	@Override
@@ -76,13 +95,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		}
 		
 		return seasons;
-	}
-
-	@Override
-	public Season getSeason(Integer seasonNumber) {
-		JsonDocument jsonDocument = bucket.get("ssn_"+seasonNumber);
-		
-		return (jsonDocument == null ? null : mapJsonToSeason(jsonDocument.content()));
 	}
 
 	/* ****************** DIVISION ****************** */
@@ -204,7 +216,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	
 	@Override
 	public SeasonDivision addSeasonDivision(Season season, Division division, int divisionPosition) {
-		JsonDocument seasonJson = bucket.get("ssn_" + season.getSeasonNumber());
+		JsonDocument seasonJson = bucket.get(generateCouchbaseSeasonKey(season.getSeasonNumber()));
 		
 		if (seasonJson == null) throw new IllegalArgumentException("Season " + season + " does not exist");
 		
@@ -246,7 +258,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	public List<SeasonDivision> getDivisionsForSeason(Season season) {
 		List<SeasonDivision> seasonDivisions = new ArrayList<SeasonDivision> ();
 		
-		JsonDocument jsonDocument = bucket.get("ssn_" + season.getSeasonNumber());
+		JsonDocument jsonDocument = bucket.get(generateCouchbaseSeasonKey(season.getSeasonNumber()));
 		
 		JsonArray divisions = jsonDocument.content().getArray("divisions");
 		
