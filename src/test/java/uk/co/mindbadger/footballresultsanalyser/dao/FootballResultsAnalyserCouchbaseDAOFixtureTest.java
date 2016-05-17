@@ -185,9 +185,19 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		Fixture fixture = dao.addFixture(season, null, division, homeTeam, awayTeam, null, null);
 		fixtureId1 = fixture.getFixtureId();
 		Fixture retrievedFixture = dao.getFixture(fixture.getFixtureId());
+		List<Fixture> fixtures = dao.getFixtures();
 		
 		// Then
-		//TODO Add the asserts here
+		assertTrue (retrievedFixture != null);
+		assertEquals (1, fixtures.size());
+		assertEquals (SEASON_1, retrievedFixture.getSeason().getSeasonNumber());
+		assertEquals (division.getDivisionId(), retrievedFixture.getDivision().getDivisionId());
+		assertEquals (homeTeam.getTeamId(), retrievedFixture.getHomeTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), retrievedFixture.getAwayTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), retrievedFixture.getAwayTeam().getTeamId());
+		assertNull (retrievedFixture.getFixtureDate());
+		assertNull (retrievedFixture.getHomeGoals());
+		assertNull (retrievedFixture.getAwayGoals());
 	}
 	
 	@Test
@@ -202,10 +212,24 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		// When
 		Fixture fixture = dao.addFixture(season, fixtureDate, division, homeTeam, awayTeam, null, null);
 		fixtureId1 = fixture.getFixtureId();
+		Fixture retrievedFixture = dao.getFixture(fixture.getFixtureId());
+		List<Fixture> fixtures = dao.getFixtures();
+		
+		// Then
+		assertTrue (retrievedFixture != null);
+		assertEquals (1, fixtures.size());
+		assertEquals (SEASON_1, retrievedFixture.getSeason().getSeasonNumber());
+		assertEquals (division.getDivisionId(), retrievedFixture.getDivision().getDivisionId());
+		assertEquals (homeTeam.getTeamId(), retrievedFixture.getHomeTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), retrievedFixture.getAwayTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), retrievedFixture.getAwayTeam().getTeamId());
+		assertEquals (fixtureDate, retrievedFixture.getFixtureDate());
+		assertNull (retrievedFixture.getHomeGoals());
+		assertNull (retrievedFixture.getAwayGoals());
 	}
 	
 	@Test
-	public void shouldAddAnPlayedFixture () {
+	public void shouldAddAPlayedFixture () {
 		// Given
 		Season season = dao.addSeason(SEASON_1);
 		Division division = dao.addDivision(DIV_NAME_1);
@@ -216,6 +240,21 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		// When
 		Fixture fixture = dao.addFixture(season, fixtureDate, division, homeTeam, awayTeam, 2, 1);
 		fixtureId1 = fixture.getFixtureId();
+		
+		Fixture retrievedFixture = dao.getFixture(fixture.getFixtureId());
+		List<Fixture> fixtures = dao.getFixtures();
+		
+		// Then
+		assertTrue (retrievedFixture != null);
+		assertEquals (1, fixtures.size());
+		assertEquals (SEASON_1, retrievedFixture.getSeason().getSeasonNumber());
+		assertEquals (division.getDivisionId(), retrievedFixture.getDivision().getDivisionId());
+		assertEquals (homeTeam.getTeamId(), retrievedFixture.getHomeTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), retrievedFixture.getAwayTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), retrievedFixture.getAwayTeam().getTeamId());
+		assertEquals (fixtureDate, retrievedFixture.getFixtureDate());
+		assertEquals (new Integer(2), retrievedFixture.getHomeGoals());
+		assertEquals (new Integer(1), retrievedFixture.getAwayGoals());
 	}
 	
 	@Test
@@ -344,5 +383,65 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		
 		// Then
 		assertEquals (7, fixtures.size());
+	}
+	
+	@Test
+	public void shouldUpdateAnUnscheduledFixtureWithADate () {
+		// Given
+		Season season = dao.addSeason(SEASON_1);
+		Division division = dao.addDivision(DIV_NAME_1);
+		Team homeTeam = dao.addTeam(TEAM_NAME_1);
+		Team awayTeam = dao.addTeam(TEAM_NAME_2);
+		Calendar fixtureDate = Calendar.getInstance();
+		
+		// When
+		dao.addFixture(season, null, division, homeTeam, awayTeam, null, null);
+		Fixture fixture = dao.addFixture(season, fixtureDate, division, homeTeam, awayTeam, null, null);
+		List<Fixture> fixtures = dao.getFixtures();
+		
+		// Then
+		fixtureId1 = fixture.getFixtureId();
+		Fixture retrievedFixture = dao.getFixture(fixture.getFixtureId());
+
+		assertTrue (retrievedFixture != null);
+		assertEquals (1, fixtures.size());
+		assertEquals (SEASON_1, fixtures.get(0).getSeason().getSeasonNumber());
+		assertEquals (division.getDivisionId(), fixtures.get(0).getDivision().getDivisionId());
+		assertEquals (homeTeam.getTeamId(), fixtures.get(0).getHomeTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
+		assertEquals (fixtureDate, fixtures.get(0).getFixtureDate());
+		assertNull (fixtures.get(0).getHomeGoals());
+		assertNull (fixtures.get(0).getAwayGoals());
+	}
+	
+	@Test
+	public void shouldUpdateAScheduledFixtureWithAScore () {
+		// Given
+		Season season = dao.addSeason(SEASON_1);
+		Division division = dao.addDivision(DIV_NAME_1);
+		Team homeTeam = dao.addTeam(TEAM_NAME_1);
+		Team awayTeam = dao.addTeam(TEAM_NAME_2);
+		Calendar fixtureDate = Calendar.getInstance();
+		
+		// When
+		dao.addFixture(season, fixtureDate, division, homeTeam, awayTeam, null, null);
+		Fixture fixture = dao.addFixture(season, fixtureDate, division, homeTeam, awayTeam, 5, 4);
+		List<Fixture> fixtures = dao.getFixtures();
+		
+		// Then
+		fixtureId1 = fixture.getFixtureId();
+		Fixture retrievedFixture = dao.getFixture(fixture.getFixtureId());
+
+		assertTrue (retrievedFixture != null);
+		assertEquals (1, fixtures.size());
+		assertEquals (SEASON_1, fixtures.get(0).getSeason().getSeasonNumber());
+		assertEquals (division.getDivisionId(), fixtures.get(0).getDivision().getDivisionId());
+		assertEquals (homeTeam.getTeamId(), fixtures.get(0).getHomeTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
+		assertEquals (fixtureDate, fixtures.get(0).getFixtureDate());
+		assertEquals (new Integer(5), retrievedFixture.getHomeGoals());
+		assertEquals (new Integer(4), retrievedFixture.getAwayGoals());
 	}
 }
