@@ -124,16 +124,13 @@ public class FootballResultsAnalyserCouchbaseDAODivisionTest {
 	}
 
 	@Test
-	public void shouldThrowAnExceptionWhenTryingToGetANonExistentSeason () {
+	public void shouldReturnNullWhenTryingToGetANonExistentSeason () {
 		// Given
 
-		try {
-			// When
-			dao.getDivision(divisionId1);
-			fail ("An exception should be thrown if a division does not exist");
-		} catch (IllegalArgumentException e) {
-			// Then
-			assertEquals ("Division "+divisionId1+" does not exist", e.getMessage());
-		}
+		// When
+		Division division = dao.getDivision(divisionId1);
+
+		// Then
+		assertNull (division);
 	}	
 }

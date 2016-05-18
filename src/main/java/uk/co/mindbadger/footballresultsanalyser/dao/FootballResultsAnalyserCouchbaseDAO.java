@@ -56,28 +56,25 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	@Override
 	public Season getSeason(Integer seasonNumber) {
 		JsonDocument jsonDocument = bucket.get(generateCouchbaseSeasonKey(seasonNumber));
-		if (jsonDocument == null) throw new IllegalArgumentException("Season " + seasonNumber + " does not exist");
-		return mapJsonToSeason(jsonDocument.content());
+		return (jsonDocument == null ? null : mapJsonToSeason(jsonDocument.content()));
 	}
 	
 	@Override
 	public Season addSeason(Integer seasonNumber) {
-		try {
-			Season existingSeason = getSeason (seasonNumber);
-			return existingSeason;
-		} catch (IllegalArgumentException e) {
-			JsonArray divisions = JsonArray.empty();
-			
-			JsonObject season = JsonObject.empty()
-					.put("type", "season")
-					.put("seasonNumber", seasonNumber)
-					.put("divisions", divisions);
-			
-			JsonDocument doc = JsonDocument.create(generateCouchbaseSeasonKey(seasonNumber), season);
-			bucket.upsert(doc);
-			
-			return mapJsonToSeason(doc.content());
-		}
+		Season existingSeason = getSeason (seasonNumber);
+		if (existingSeason != null)	return existingSeason;
+		
+		JsonArray divisions = JsonArray.empty();
+		
+		JsonObject season = JsonObject.empty()
+				.put("type", "season")
+				.put("seasonNumber", seasonNumber)
+				.put("divisions", divisions);
+		
+		JsonDocument doc = JsonDocument.create(generateCouchbaseSeasonKey(seasonNumber), season);
+		bucket.upsert(doc);
+		
+		return mapJsonToSeason(doc.content());
 	}
 	
 	@Override
@@ -128,8 +125,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	@Override
 	public Division getDivision(String divisionId) {
 		JsonDocument doc = bucket.get(generateCouchbaseDivisionKey(divisionId));
-		if (doc == null) throw new IllegalArgumentException("Division " + divisionId + " does not exist");
-		return mapJsonToDivision(doc.content());
+		return (doc == null ? null : mapJsonToDivision(doc.content()));
 	}
 	
 	@Override
@@ -230,8 +226,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	@Override
 	public Team getTeam(String teamId) {
 		JsonDocument doc = bucket.get(generateCouchbaseTeamKey(teamId));
-		if (doc == null) throw new IllegalArgumentException("Team " + teamId + " does not exist");
-		return mapJsonToTeam(doc.content());
+		return (doc == null ? null : mapJsonToTeam(doc.content()));
 	}
 
 	@Override
@@ -403,7 +398,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		ViewResult result = bucket.query(ViewQuery.from("fixture", "unique").key(jsonArrayKey).stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
-			System.out.println("Got a matching fixture!");
 			String key = (String) row.id();
 			JsonDocument doc = bucket.get(key);
 			JsonObject teamRow = doc.content();
@@ -527,8 +521,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	@Override
 	public Fixture getFixture(String fixtureId) {
 		JsonDocument doc = bucket.get(generateCouchbaseFixtureKey(fixtureId));
-		if (doc == null) throw new IllegalArgumentException("Fixture " + fixtureId + " does not exist");
-		return mapJsonToFixture(doc.content());
+		return (doc == null ? null : mapJsonToFixture(doc.content()));
 	}
 
 	@Override

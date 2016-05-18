@@ -57,17 +57,14 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonTest {
 	}
 
 	@Test
-	public void shouldThrowAnExceptionWhenTryingToGetANonExistentSeason () {
+	public void shouldReturnNullWhenTryingToGetANonExistentSeason () {
 		// Given
 
-		try {
-			// When
-			dao.getSeason(1766);
-			fail ("An exception should be thrown if a season does not exist");
-		} catch (IllegalArgumentException e) {
-			// Then
-			assertEquals ("Season 1766 does not exist", e.getMessage());
-		}
+		// When
+		Season season = dao.getSeason(1766);
+
+		// Then
+		assertNull (season);
 	}	
 
 	@Test
