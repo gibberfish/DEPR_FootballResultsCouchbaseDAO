@@ -10,6 +10,14 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
+import uk.co.mindbadger.footballresultsanalyser.domain.Division;
+import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
+import uk.co.mindbadger.footballresultsanalyser.domain.Fixture;
+import uk.co.mindbadger.footballresultsanalyser.domain.Season;
+import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivision;
+import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
+import uk.co.mindbadger.footballresultsanalyser.domain.Team;
+
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
@@ -21,15 +29,6 @@ import com.couchbase.client.java.view.Stale;
 import com.couchbase.client.java.view.ViewQuery;
 import com.couchbase.client.java.view.ViewResult;
 import com.couchbase.client.java.view.ViewRow;
-import com.couchbase.client.protocol.views.ComplexKey;
-
-import uk.co.mindbadger.footballresultsanalyser.domain.Division;
-import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
-import uk.co.mindbadger.footballresultsanalyser.domain.Fixture;
-import uk.co.mindbadger.footballresultsanalyser.domain.Season;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivision;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
-import uk.co.mindbadger.footballresultsanalyser.domain.Team;
 
 public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnalyserDAO {
 	Logger logger = Logger.getLogger(FootballResultsAnalyserCouchbaseDAO.class);
@@ -394,13 +393,14 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	
 	public Fixture getUnqiueFixture(Season season, Division division, Team homeTeam, Team awayTeam) {
 		Fixture fixture = null;
-		//ComplexKey uniqueKey = ComplexKey.of(season.getSeasonNumber(), division.getDivisionId(), homeTeam.getTeamId(), awayTeam.getTeamId());
-		//String uniqueKey = "[ "+season.getSeasonNumber()+", \""+division.getDivisionId()+"\", \""+homeTeam.getTeamId()+"\", \""+awayTeam.getTeamId()+"\" ]";
-		String uniqueKey = "["+season.getSeasonNumber()+", \""+division.getDivisionId()+"\", \""+homeTeam.getTeamId()+"\", \""+awayTeam.getTeamId()+"\"]";
 		
-		System.out.println("Looking for matching fixture with key: " + uniqueKey);
+		JsonArray jsonArrayKey = JsonArray.empty();
+		jsonArrayKey.add(season.getSeasonNumber());
+		jsonArrayKey.add(division.getDivisionId());
+		jsonArrayKey.add(homeTeam.getTeamId());
+		jsonArrayKey.add(awayTeam.getTeamId());
 		
-		ViewResult result = bucket.query(ViewQuery.from("fixture", "unique").key(uniqueKey).stale(Stale.FALSE));
+		ViewResult result = bucket.query(ViewQuery.from("fixture", "unique").key(jsonArrayKey).stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
 			System.out.println("Got a matching fixture!");
@@ -445,7 +445,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		}
 
 		if (awayGoals != null) {
-			fixtureObject.setHomeGoals(awayGoals);
+			fixtureObject.setAwayGoals(awayGoals);
 		}
 
 		return fixtureObject;

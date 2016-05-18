@@ -1,5 +1,5 @@
-"c:\Program Files\Couchbase\Server\bin\cbbackup.exe" http://localhost:8091 C:\m\git\FootballResultsCouchbaseDAO\db\ -u Administrator -p PASSWORD -b footballTest -x design_doc_only=1
-"c:\Program Files\Couchbase\Server\bin\cbbackup.exe" http://localhost:8091 C:\dev\FootballResultsCouchbaseDAO\db -u Administrator -p PASSWORD -b footballTest -x design_doc_only=1
+"c:\Program Files\Couchbase\Server\bin\cbbackup.exe" http://localhost:8091 C:\m\git\FootballResultsCouchbaseDAO\db\ -x design_doc_only=1 -b footballTest -u Administrator -p PASSWORD
+"c:\Program Files\Couchbase\Server\bin\cbbackup.exe" http://localhost:8091 C:\dev\FootballResultsCouchbaseDAO\db -x design_doc_only=1 -b footballTest -u Administrator -p PASSWORD
 
 "c:\Program Files\Couchbase\Server\bin\cbrestore.exe" C:\m\git\FootballResultsCouchbaseDAO\db\ http://localhost:8091 -x design_doc_only=1 -b footballTest -u Administrator -p PASSWORD
 "c:\Program Files\Couchbase\Server\bin\cbrestore.exe" C:\dev\FootballResultsCouchbaseDAO\db\ http://localhost:8091 -x design_doc_only=1 -b footballTest -u Administrator -p PASSWORD

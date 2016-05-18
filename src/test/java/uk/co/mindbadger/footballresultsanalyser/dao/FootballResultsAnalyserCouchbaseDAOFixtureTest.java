@@ -1,6 +1,9 @@
 package uk.co.mindbadger.footballresultsanalyser.dao;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -9,7 +12,6 @@ import java.util.List;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import uk.co.mindbadger.footballresultsanalyser.domain.Division;
@@ -17,8 +19,6 @@ import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
 import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactoryImpl;
 import uk.co.mindbadger.footballresultsanalyser.domain.Fixture;
 import uk.co.mindbadger.footballresultsanalyser.domain.Season;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivision;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
 import uk.co.mindbadger.footballresultsanalyser.domain.Team;
 
 public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
@@ -327,7 +327,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		fixtureId5 = fixture5.getFixtureId();
 		Fixture fixture6 = dao.addFixture(season, fixtureDate2, division, team1, team4, null, null);
 		fixtureId6 = fixture6.getFixtureId();
-		Fixture fixture7 = dao.addFixture(season, fixtureDate3, division, team1, team4, null, null);
+		Fixture fixture7 = dao.addFixture(season, fixtureDate3, division, team2, team4, null, null);
 		fixtureId7 = fixture7.getFixtureId();
 		
 		// When
@@ -376,7 +376,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		fixtureId5 = fixture5.getFixtureId();
 		Fixture fixture6 = dao.addFixture(season, fixtureDate2, division, team1, team4, null, null);
 		fixtureId6 = fixture6.getFixtureId();
-		Fixture fixture7 = dao.addFixture(season, fixtureDate3, division, team1, team4, null, null);
+		Fixture fixture7 = dao.addFixture(season, fixtureDate3, division, team2, team4, null, null);
 		fixtureId7 = fixture7.getFixtureId();
 		
 		// When
