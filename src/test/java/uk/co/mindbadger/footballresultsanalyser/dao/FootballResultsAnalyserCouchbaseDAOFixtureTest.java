@@ -445,7 +445,83 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		assertEquals (new Integer(5), retrievedFixture.getHomeGoals());
 		assertEquals (new Integer(4), retrievedFixture.getAwayGoals());
 	}
-	
+
+	@Test
+	public void shouldUpdateAPlayedFixtureWithAnEarlierDate () {
+		// This is the scenario where a playoff fixture is saved first and then the original is saved afterwards.
+		
+		// Given
+		Season season = dao.addSeason(SEASON_1);
+		Division division = dao.addDivision(DIV_NAME_1);
+		Team homeTeam = dao.addTeam(TEAM_NAME_1);
+		Team awayTeam = dao.addTeam(TEAM_NAME_2);
+		Calendar firstFixtureDate = Calendar.getInstance();
+		firstFixtureDate.set(Calendar.YEAR, 2006);
+		firstFixtureDate.set(Calendar.MONTH, 5);
+		firstFixtureDate.set(Calendar.DAY_OF_MONTH, 6);
+		Calendar secondFixtureDate = Calendar.getInstance();
+		secondFixtureDate.set(Calendar.YEAR, 2005);
+		secondFixtureDate.set(Calendar.MONTH, 10);
+		secondFixtureDate.set(Calendar.DAY_OF_MONTH, 21);
+		dao.addFixture(season, firstFixtureDate, division, homeTeam, awayTeam, 2, 1);
+		
+		// When
+		dao.addFixture(season, secondFixtureDate, division, homeTeam, awayTeam, 3, 3);
+		List<Fixture> fixtures = dao.getFixtures();
+		
+		// Then
+		assertEquals (1, fixtures.size());
+		assertEquals (SEASON_1, fixtures.get(0).getSeason().getSeasonNumber());
+		assertEquals (division.getDivisionId(), fixtures.get(0).getDivision().getDivisionId());
+		assertEquals (homeTeam.getTeamId(), fixtures.get(0).getHomeTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
+		assertTrue (areDatesTheSame(secondFixtureDate, fixtures.get(0).getFixtureDate()));
+		assertEquals (new Integer(3), fixtures.get(0).getHomeGoals());
+		assertEquals (new Integer(3), fixtures.get(0).getAwayGoals());
+	}
+
+	@Test
+	public void shouldThrowAnExceptionWhenUpdatingAPlayedFixtureWithALaterDate () {
+		// This is the scenario for playoffs.
+		
+		// Given
+		Season season = dao.addSeason(SEASON_1);
+		Division division = dao.addDivision(DIV_NAME_1);
+		Team homeTeam = dao.addTeam(TEAM_NAME_1);
+		Team awayTeam = dao.addTeam(TEAM_NAME_2);
+		Calendar firstFixtureDate = Calendar.getInstance();
+		firstFixtureDate.set(Calendar.YEAR, 2005);
+		firstFixtureDate.set(Calendar.MONTH, 10);
+		firstFixtureDate.set(Calendar.DAY_OF_MONTH, 21);
+		Calendar secondFixtureDate = Calendar.getInstance();
+		secondFixtureDate.set(Calendar.YEAR, 2006);
+		secondFixtureDate.set(Calendar.MONTH, 5);
+		secondFixtureDate.set(Calendar.DAY_OF_MONTH, 6);
+		dao.addFixture(season, firstFixtureDate, division, homeTeam, awayTeam, 2, 1);
+
+		// When
+		try {
+			dao.addFixture(season, secondFixtureDate, division, homeTeam, awayTeam, 5, 4);
+			fail("Should throw an exception when trying to save a playoff over a regular match");
+		} catch (ChangeScoreException e) {
+			assertEquals ("Can't save a playoff result over a regular game", e.getMessage());
+		}
+		
+		List<Fixture> fixtures = dao.getFixtures();
+		
+		// Then
+		assertEquals (1, fixtures.size());
+		assertEquals (SEASON_1, fixtures.get(0).getSeason().getSeasonNumber());
+		assertEquals (division.getDivisionId(), fixtures.get(0).getDivision().getDivisionId());
+		assertEquals (homeTeam.getTeamId(), fixtures.get(0).getHomeTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
+		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
+		assertTrue (areDatesTheSame(firstFixtureDate, fixtures.get(0).getFixtureDate()));
+		assertEquals (new Integer(2), fixtures.get(0).getHomeGoals());
+		assertEquals (new Integer(1), fixtures.get(0).getAwayGoals());
+	}
+
 	private boolean areDatesTheSame (Calendar date1, Calendar date2) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 		String date1String = sdf.format(date1.getTime());

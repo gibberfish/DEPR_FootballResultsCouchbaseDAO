@@ -460,6 +460,13 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		if (homeGoals != null && fixtureDate == null) throw new IllegalArgumentException("Please supply a fixture date team when creating a played fixture");
 		
 		Fixture fixtureObject = getUnqiueFixture (season, division, homeTeam, awayTeam);
+		
+		if (fixtureDate != null && fixtureObject != null && fixtureObject.getFixtureDate() != null) {
+			if (fixtureObject.getFixtureDate().before(fixtureDate) &&
+					fixtureObject.getHomeGoals() != null && homeGoals != null)
+				throw new ChangeScoreException ("Can't save a playoff result over a regular game");
+		}
+		
 		Long newId = null;
 		
 		if (fixtureObject != null) {
@@ -476,12 +483,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 			
 			fixtureObject = domainObjectFactory.createFixture(season, homeTeam, awayTeam);
 		}
-		
-		fixtureObject.setDivision(division);
-		fixtureObject.setFixtureId(newId.toString());
-		fixtureObject.setFixtureDate(fixtureDate);
-		fixtureObject.setHomeGoals(homeGoals);
-		fixtureObject.setAwayGoals(awayGoals);
 
 		JsonObject fixture = JsonObject.empty()
 				.put("type", "fixture")
@@ -492,7 +493,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 				.put("divisionId", division.getDivisionId())				
 				;
 		
-		if (fixtureDate != null) {
+		if (fixtureDate != null) {			
 			SimpleDateFormat niceSdf = new SimpleDateFormat("dd/MM/yyyy");
 			String fixtureDateAsString = niceSdf.format(fixtureDate.getTime());
 			fixture.put("fixtureDate", fixtureDateAsString);
@@ -514,6 +515,12 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		
 		JsonDocument doc = JsonDocument.create(generateCouchbaseFixtureKey(newId.toString()), fixture);
 		bucket.upsert(doc);
+		
+		fixtureObject.setDivision(division);
+		fixtureObject.setFixtureId(newId.toString());
+		fixtureObject.setFixtureDate(fixtureDate);
+		fixtureObject.setHomeGoals(homeGoals);
+		fixtureObject.setAwayGoals(awayGoals);
 		
 		return fixtureObject;
 	}
