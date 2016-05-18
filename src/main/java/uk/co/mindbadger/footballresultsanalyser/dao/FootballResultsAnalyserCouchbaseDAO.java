@@ -21,6 +21,7 @@ import com.couchbase.client.java.view.Stale;
 import com.couchbase.client.java.view.ViewQuery;
 import com.couchbase.client.java.view.ViewResult;
 import com.couchbase.client.java.view.ViewRow;
+import com.couchbase.client.protocol.views.ComplexKey;
 
 import uk.co.mindbadger.footballresultsanalyser.domain.Division;
 import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
@@ -129,7 +130,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	public Division getDivision(String divisionId) {
 		JsonDocument doc = bucket.get(generateCouchbaseDivisionKey(divisionId));
 		if (doc == null) throw new IllegalArgumentException("Division " + divisionId + " does not exist");
-		return (doc == null ? null : mapJsonToDivision(doc.content()));
+		return mapJsonToDivision(doc.content());
 	}
 	
 	@Override
@@ -391,6 +392,27 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	
 	/* ****************** FIXTURE ****************** */
 	
+	public Fixture getUnqiueFixture(Season season, Division division, Team homeTeam, Team awayTeam) {
+		Fixture fixture = null;
+		//ComplexKey uniqueKey = ComplexKey.of(season.getSeasonNumber(), division.getDivisionId(), homeTeam.getTeamId(), awayTeam.getTeamId());
+		//String uniqueKey = "[ "+season.getSeasonNumber()+", \""+division.getDivisionId()+"\", \""+homeTeam.getTeamId()+"\", \""+awayTeam.getTeamId()+"\" ]";
+		String uniqueKey = "["+season.getSeasonNumber()+", \""+division.getDivisionId()+"\", \""+homeTeam.getTeamId()+"\", \""+awayTeam.getTeamId()+"\"]";
+		
+		System.out.println("Looking for matching fixture with key: " + uniqueKey);
+		
+		ViewResult result = bucket.query(ViewQuery.from("fixture", "unique").key(uniqueKey).stale(Stale.FALSE));
+		
+		for (ViewRow row : result.allRows()) {
+			System.out.println("Got a matching fixture!");
+			String key = (String) row.id();
+			JsonDocument doc = bucket.get(key);
+			JsonObject teamRow = doc.content();
+			fixture = mapJsonToFixture (teamRow);
+		}
+		
+		return fixture;
+	}
+
 	private Fixture mapJsonToFixture(JsonObject jsonFixture) {
 		Season season = getSeason(jsonFixture.getInt("seasonNumber"));
 		Division division = getDivision(jsonFixture.getString("divisionId"));
@@ -428,6 +450,10 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 
 		return fixtureObject;
 	}
+
+	private String generateCouchbaseFixtureKey (String fixtureId) {
+		return "fix_" + fixtureId;
+	}
 	
 	@Override
 	public Fixture addFixture(Season season, Calendar fixtureDate, Division division, Team homeTeam, Team awayTeam, Integer homeGoals,
@@ -439,17 +465,30 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		if (awayTeam == null) throw new IllegalArgumentException("Please supply an away team when creating a fixture");
 		if (homeGoals != null && fixtureDate == null) throw new IllegalArgumentException("Please supply a fixture date team when creating a played fixture");
 		
-		JsonLongDocument newIdLongDoc = null;
-		try {
-			newIdLongDoc = bucket.counter("fixtureId", +1);
-		} catch (Exception e) {
-			newIdLongDoc = JsonLongDocument.create("fixtureId", 0L);
-			bucket.insert(newIdLongDoc);
+		Fixture fixtureObject = getUnqiueFixture (season, division, homeTeam, awayTeam);
+		Long newId = null;
+		
+		if (fixtureObject != null) {
+			newId = Long.valueOf(fixtureObject.getFixtureId());
+		} else {
+			JsonLongDocument newIdLongDoc = null;
+			try {
+				newIdLongDoc = bucket.counter("fixtureId", +1);
+			} catch (Exception e) {
+				newIdLongDoc = JsonLongDocument.create("fixtureId", 0L);
+				bucket.insert(newIdLongDoc);
+			}
+			newId = newIdLongDoc.content();
+			
+			fixtureObject = domainObjectFactory.createFixture(season, homeTeam, awayTeam);
 		}
-		Long newId = newIdLongDoc.content();
 		
-		String generatedIdString = "fix_" + newId;
-		
+		fixtureObject.setDivision(division);
+		fixtureObject.setFixtureId(newId.toString());
+		fixtureObject.setFixtureDate(fixtureDate);
+		fixtureObject.setHomeGoals(homeGoals);
+		fixtureObject.setAwayGoals(awayGoals);
+
 		JsonObject fixture = JsonObject.empty()
 				.put("type", "fixture")
 				.put("fixtureId", newId)
@@ -459,28 +498,27 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 				.put("divisionId", division.getDivisionId())				
 				;
 		
-		Fixture fixtureObject = domainObjectFactory.createFixture(season, homeTeam, awayTeam);
-		fixtureObject.setDivision(division);
-		fixtureObject.setFixtureId(newId.toString());
-		
 		if (fixtureDate != null) {
 			SimpleDateFormat niceSdf = new SimpleDateFormat("dd/MM/yyyy");
 			String fixtureDateAsString = niceSdf.format(fixtureDate.getTime());
 			fixture.put("fixtureDate", fixtureDateAsString);
-			fixtureObject.setFixtureDate(fixtureDate);
+		} else {
+			fixture.removeKey("fixtureDate");
 		}
 		
 		if (homeGoals != null) {
 			fixture.put("homeGoals", homeGoals);
-			fixtureObject.setHomeGoals(homeGoals);
+		} else {
+			fixture.removeKey("homeGoals");
 		}
 		
 		if (awayGoals != null) {
 			fixture.put("awayGoals", awayGoals);
-			fixtureObject.setAwayGoals(awayGoals);
+		} else {
+			fixture.removeKey("awayGoals");
 		}
 		
-		JsonDocument doc = JsonDocument.create(generatedIdString, fixture);
+		JsonDocument doc = JsonDocument.create(generateCouchbaseFixtureKey(newId.toString()), fixture);
 		bucket.upsert(doc);
 		
 		return fixtureObject;
@@ -488,10 +526,9 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 
 	@Override
 	public Fixture getFixture(String fixtureId) {
-		String generateIdString = "fixture_" + fixtureId;
-		JsonDocument doc = bucket.get(generateIdString);
-		
-		return (doc == null ? null : mapJsonToFixture(doc.content()));
+		JsonDocument doc = bucket.get(generateCouchbaseFixtureKey(fixtureId));
+		if (doc == null) throw new IllegalArgumentException("Fixture " + fixtureId + " does not exist");
+		return mapJsonToFixture(doc.content());
 	}
 
 	@Override

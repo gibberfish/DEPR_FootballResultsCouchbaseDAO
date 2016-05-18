@@ -2,6 +2,7 @@ package uk.co.mindbadger.footballresultsanalyser.dao;
 
 import static org.junit.Assert.*;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
@@ -223,7 +224,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		assertEquals (homeTeam.getTeamId(), retrievedFixture.getHomeTeam().getTeamId());
 		assertEquals (awayTeam.getTeamId(), retrievedFixture.getAwayTeam().getTeamId());
 		assertEquals (awayTeam.getTeamId(), retrievedFixture.getAwayTeam().getTeamId());
-		assertEquals (fixtureDate, retrievedFixture.getFixtureDate());
+		assertTrue (areDatesTheSame(fixtureDate, retrievedFixture.getFixtureDate()));
 		assertNull (retrievedFixture.getHomeGoals());
 		assertNull (retrievedFixture.getAwayGoals());
 	}
@@ -252,7 +253,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		assertEquals (homeTeam.getTeamId(), retrievedFixture.getHomeTeam().getTeamId());
 		assertEquals (awayTeam.getTeamId(), retrievedFixture.getAwayTeam().getTeamId());
 		assertEquals (awayTeam.getTeamId(), retrievedFixture.getAwayTeam().getTeamId());
-		assertEquals (fixtureDate, retrievedFixture.getFixtureDate());
+		assertTrue (areDatesTheSame(fixtureDate, retrievedFixture.getFixtureDate()));
 		assertEquals (new Integer(2), retrievedFixture.getHomeGoals());
 		assertEquals (new Integer(1), retrievedFixture.getAwayGoals());
 	}
@@ -410,7 +411,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		assertEquals (homeTeam.getTeamId(), fixtures.get(0).getHomeTeam().getTeamId());
 		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
 		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
-		assertEquals (fixtureDate, fixtures.get(0).getFixtureDate());
+		assertTrue (areDatesTheSame(fixtureDate, fixtures.get(0).getFixtureDate()));
 		assertNull (fixtures.get(0).getHomeGoals());
 		assertNull (fixtures.get(0).getAwayGoals());
 	}
@@ -440,8 +441,15 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		assertEquals (homeTeam.getTeamId(), fixtures.get(0).getHomeTeam().getTeamId());
 		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
 		assertEquals (awayTeam.getTeamId(), fixtures.get(0).getAwayTeam().getTeamId());
-		assertEquals (fixtureDate, fixtures.get(0).getFixtureDate());
+		assertTrue (areDatesTheSame(fixtureDate, fixtures.get(0).getFixtureDate()));
 		assertEquals (new Integer(5), retrievedFixture.getHomeGoals());
 		assertEquals (new Integer(4), retrievedFixture.getAwayGoals());
+	}
+	
+	private boolean areDatesTheSame (Calendar date1, Calendar date2) {
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		String date1String = sdf.format(date1.getTime());
+		String date2String = sdf.format(date2.getTime());
+		return date1String.equals(date2String);
 	}
 }
