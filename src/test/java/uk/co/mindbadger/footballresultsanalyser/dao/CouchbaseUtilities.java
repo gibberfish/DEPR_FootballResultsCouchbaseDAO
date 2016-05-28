@@ -6,8 +6,6 @@ import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
 
-import uk.co.mindbadger.footballresults.loader.FootballResultsLoader;
-
 public class CouchbaseUtilities {
 	Logger logger = Logger.getLogger(CouchbaseUtilities.class);
 	
