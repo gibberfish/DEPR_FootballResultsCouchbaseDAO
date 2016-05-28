@@ -1,12 +1,18 @@
 package uk.co.mindbadger.footballresultsanalyser.dao;
 
+import org.apache.log4j.Logger;
+
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.CouchbaseCluster;
 
+import uk.co.mindbadger.footballresults.loader.FootballResultsLoader;
+
 public class CouchbaseUtilities {
+	Logger logger = Logger.getLogger(CouchbaseUtilities.class);
+	
 	public void flushBucket (String bucketName) {
-		System.out.println("Flushing Bucket");
+		logger.info("Flushing Bucket");
 		Cluster cluster = CouchbaseCluster.create();
 		Bucket bucket = cluster.openBucket(bucketName);
 		bucket.bucketManager().flush();
