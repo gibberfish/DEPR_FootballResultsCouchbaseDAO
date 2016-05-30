@@ -287,6 +287,12 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		
 		return domainObjectFactory.createSeasonDivision(season, division, divisionPosition);
 	}
+
+	@Override
+	public SeasonDivision getSeasonDivision(Season arg0, Division arg1) {
+		//TODO Implement this method
+		throw new RuntimeException("This method is not yet implememented");
+	}
 	
 	@Override
 	public List<SeasonDivision> getDivisionsForSeason(Season season) {
@@ -590,6 +596,18 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		return fixtures;
 	}
 
+	@Override
+	public List<Fixture> getFixturesForDivisionInSeason(SeasonDivision arg0) {
+		//TODO Implement this method
+		throw new RuntimeException("This method is not yet implememented");
+	}
+
+	@Override
+	public List<Fixture> getFixturesForTeamInDivisionInSeason(SeasonDivision arg0, Team arg1) {
+		//TODO Implement this method
+		throw new RuntimeException("This method is not yet implememented");
+	}
+	
 	/* ****************** UTILS, GETTERS & SETTERS ****************** */
 	
 	@Override
