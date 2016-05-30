@@ -19,6 +19,8 @@ import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
 import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactoryImpl;
 import uk.co.mindbadger.footballresultsanalyser.domain.Fixture;
 import uk.co.mindbadger.footballresultsanalyser.domain.Season;
+import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivision;
+import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionImpl;
 import uk.co.mindbadger.footballresultsanalyser.domain.Team;
 
 public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
@@ -28,6 +30,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 	private static final Integer SEASON_1 = 2001;
 	private static final Integer SEASON_2 = 2002;
 	private static final String DIV_NAME_1 = "Premier";
+	private static final String DIV_NAME_2 = "Championship";
 	private static final String TEAM_NAME_1 = "Porstmouth";
 	private static final String TEAM_NAME_2 = "Arsenal";
 	private static final String TEAM_NAME_3 = "Walsall";
@@ -386,6 +389,63 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		assertEquals (7, fixtures.size());
 	}
 	
+	@Test
+	public void shouldGetFixturesForDivisionInSeason () {
+		// Given
+		Season season = dao.addSeason(SEASON_1);
+		
+		Division division1 = dao.addDivision(DIV_NAME_1);
+		Division division2 = dao.addDivision(DIV_NAME_2);
+		
+		Team team1 = dao.addTeam(TEAM_NAME_1);
+		teamId1 = team1.getTeamId();
+		Team team2 = dao.addTeam(TEAM_NAME_2);
+		teamId2 = team1.getTeamId();
+		Team team3 = dao.addTeam(TEAM_NAME_3);
+		teamId3 = team1.getTeamId();
+		Team team4 = dao.addTeam(TEAM_NAME_4);
+		teamId4 = team1.getTeamId();
+
+		Calendar fixtureDate1 = Calendar.getInstance();
+		fixtureDate1.set(Calendar.YEAR, 2003);
+		fixtureDate1.set(Calendar.MONTH, 4);
+		fixtureDate1.set(Calendar.DAY_OF_MONTH, 15);
+		Calendar fixtureDate2 = Calendar.getInstance();
+		fixtureDate2.set(Calendar.YEAR, 2003);
+		fixtureDate2.set(Calendar.MONTH, 4);
+		fixtureDate2.set(Calendar.DAY_OF_MONTH, 21);
+		Calendar fixtureDate3 = Calendar.getInstance();
+		fixtureDate3.set(Calendar.YEAR, 2070);
+		fixtureDate3.set(Calendar.MONTH, 4);
+		fixtureDate3 .set(Calendar.DAY_OF_MONTH, 21);
+		
+		Fixture fixture1 = dao.addFixture(season, fixtureDate1, division1, team1, team2, 2, 1);
+		fixtureId1 = fixture1.getFixtureId();
+		Fixture fixture2 = dao.addFixture(season, fixtureDate1, division2, team3, team4, 0, 1);
+		fixtureId2 = fixture2.getFixtureId();
+		Fixture fixture3 = dao.addFixture(season, fixtureDate2, division1, team2, team1, 3, 1);
+		fixtureId3 = fixture1.getFixtureId();
+		Fixture fixture4 = dao.addFixture(season, fixtureDate2, division2, team4, team3, 2, 2);
+		fixtureId4 = fixture2.getFixtureId();		
+		
+		SeasonDivision seasonDivision = new SeasonDivisionImpl ();
+		seasonDivision.setSeason(season);
+		seasonDivision.setDivision(division2);
+		
+		// When
+		List<Fixture> fixtures = dao.getFixturesForDivisionInSeason(seasonDivision);
+		
+		// Then
+		assertEquals (2, fixtures.size());
+		assertEquals (fixtureId2, fixtures.get(0).getFixtureId());
+		assertEquals (fixtureId4, fixtures.get(1).getFixtureId());		
+	}
+
+	@Test
+	public void shouldGetFixturesForTeamInDivisionInSeason () {
+		
+	}
+
 	@Test
 	public void shouldUpdateAnUnscheduledFixtureWithADate () {
 		// Given
