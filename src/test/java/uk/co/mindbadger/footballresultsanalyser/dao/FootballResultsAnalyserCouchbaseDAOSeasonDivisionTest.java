@@ -142,5 +142,41 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonDivisionTest {
 		assertEquals (2, returnedSeasonDivision2.getDivisionPosition());
 	}
 	
+	@Test
+	public void shouldThrowAnExceptionWhenTheRequestedSeasonDivisionDoesntExist () {
+		// Given
+		Season season = dao.addSeason(SEASON_1);
+		Division division = dao.addDivision(DIV_NAME_1);
+		Division nonExistentDivision = dao.addDivision(DIV_NAME_2);
+		SeasonDivision seasonDivision = dao.addSeasonDivision(season, division, 3);
+		
+		try {
+			// When
+			dao.getSeasonDivision(season, nonExistentDivision);
+			fail("An exception should be thrown when tryying to get a non existent Season/Division");
+		} catch (IllegalArgumentException e) {
+			// Then
+			assertEquals("Season/Division 2001/Championship does not exist", e.getMessage());
+		}		
+	}
+	
+	@Test
+	public void shouldReturnRequestedSeasonDivision () {
+		// Given
+		Season season = dao.addSeason(SEASON_1);
+		Division division1 = dao.addDivision(DIV_NAME_1);
+		Division division2 = dao.addDivision(DIV_NAME_2);
+		
+		SeasonDivision seasonDivision1 = dao.addSeasonDivision(season, division1, 3);
+		SeasonDivision seasonDivision2 = dao.addSeasonDivision(season, division2, 2);
+
+		// When
+		SeasonDivision seasonDivision = dao.getSeasonDivision(season, division1);
+		
+		// Then (check return value)
+		assertEquals (seasonDivision1.getSeason().getSeasonNumber(), seasonDivision.getSeason().getSeasonNumber());
+		assertEquals (seasonDivision1.getDivision().getDivisionId(), seasonDivision.getDivision().getDivisionId());
+	}
+	
 	//TODO Need to add some tests for cases where we pass in incomplete objects to the creates
 }

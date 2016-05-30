@@ -289,9 +289,16 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	}
 
 	@Override
-	public SeasonDivision getSeasonDivision(Season arg0, Division arg1) {
-		//TODO Implement this method
-		throw new RuntimeException("This method is not yet implememented");
+	public SeasonDivision getSeasonDivision(Season season, Division division) {
+		List<SeasonDivision> seasonDivisions = getDivisionsForSeason(season);
+		
+		for (SeasonDivision seasonDivision : seasonDivisions) {
+			if (division.getDivisionId().equals(seasonDivision.getDivision().getDivisionId())) {
+				return seasonDivision;
+			}
+		}
+		
+		throw new IllegalArgumentException("Season/Division " + season.getSeasonNumber() + "/" + division.getDivisionName() + " does not exist");
 	}
 	
 	@Override
