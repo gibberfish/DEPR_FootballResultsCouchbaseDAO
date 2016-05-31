@@ -394,7 +394,6 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		assertEquals (7, fixtures.size());
 	}
 	
-	@org.junit.Ignore
 	@Test
 	public void shouldGetFixturesForDivisionInSeason () {
 		// Given
@@ -430,9 +429,9 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		Fixture fixture2 = dao.addFixture(season, fixtureDate1, division2, team3, team4, 0, 1);
 		fixtureId2 = fixture2.getFixtureId();
 		Fixture fixture3 = dao.addFixture(season, fixtureDate2, division1, team2, team1, 3, 1);
-		fixtureId3 = fixture1.getFixtureId();
+		fixtureId3 = fixture3.getFixtureId();
 		Fixture fixture4 = dao.addFixture(season, fixtureDate2, division2, team4, team3, 2, 2);
-		fixtureId4 = fixture2.getFixtureId();		
+		fixtureId4 = fixture4.getFixtureId();		
 		
 		SeasonDivision seasonDivision = new SeasonDivisionImpl ();
 		seasonDivision.setSeason(season);

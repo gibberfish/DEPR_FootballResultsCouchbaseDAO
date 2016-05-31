@@ -607,11 +607,17 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	public List<Fixture> getFixturesForDivisionInSeason(SeasonDivision seasonDivision) {
 		List<Fixture> fixtures = new ArrayList<Fixture> ();
 		
-		JsonArray jsonArrayKey = JsonArray.empty();
-		jsonArrayKey.add(seasonDivision.getSeason().getSeasonNumber());
-		jsonArrayKey.add(seasonDivision.getDivision().getDivisionId());
-		
-		ViewResult result = bucket.query(ViewQuery.from("fixture", "by_season_division").key(jsonArrayKey).stale(Stale.FALSE));
+		JsonArray jsonFromArrayKey = JsonArray.empty();
+		jsonFromArrayKey.add(seasonDivision.getSeason().getSeasonNumber());
+		jsonFromArrayKey.add(seasonDivision.getDivision().getDivisionId());
+
+		JsonArray jsonToArrayKey = JsonArray.empty();
+		jsonToArrayKey.add(seasonDivision.getSeason().getSeasonNumber());
+		jsonToArrayKey.add(seasonDivision.getDivision().getDivisionId());
+		jsonToArrayKey.add("\u0fff");
+
+		ViewResult result = bucket.query(ViewQuery.from("fixture", "unique").startKey(jsonFromArrayKey)
+				.endKey(jsonToArrayKey).stale(Stale.FALSE));
 		
 		for (ViewRow row : result.allRows()) {
 			String key = (String) row.id();
