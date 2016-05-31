@@ -21,6 +21,8 @@ import uk.co.mindbadger.footballresultsanalyser.domain.Fixture;
 import uk.co.mindbadger.footballresultsanalyser.domain.Season;
 import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivision;
 import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionImpl;
+import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
+import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionTeamImpl;
 import uk.co.mindbadger.footballresultsanalyser.domain.Team;
 
 public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
@@ -35,6 +37,8 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 	private static final String TEAM_NAME_2 = "Arsenal";
 	private static final String TEAM_NAME_3 = "Walsall";
 	private static final String TEAM_NAME_4 = "Bristol City";
+	private static final String TEAM_NAME_5 = "Brighton";
+	private static final String TEAM_NAME_6 = "Torquay";
 
 	private FootballResultsAnalyserCouchbaseDAO dao;
 	
@@ -44,6 +48,8 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 	private String teamId2;
 	private String teamId3;
 	private String teamId4;
+	private String teamId5;
+	private String teamId6;
 	private String fixtureId1;
 	private String fixtureId2;
 	private String fixtureId3;
@@ -77,7 +83,7 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 		dao.closeSession();
 		cbUtils.tearDownSeasons(new Integer[] {SEASON_1, SEASON_2}, TEST_BUCKET_NAME);
 		cbUtils.tearDownDivisions(new String[] {divisionId1, divisionId2}, TEST_BUCKET_NAME);
-		cbUtils.tearDownTeams(new String[] {teamId1, teamId2, teamId3, teamId4}, TEST_BUCKET_NAME);
+		cbUtils.tearDownTeams(new String[] {teamId1, teamId2, teamId3, teamId4, teamId5, teamId6}, TEST_BUCKET_NAME);
 		cbUtils.tearDownFixtures(new String[] {fixtureId1, fixtureId2, fixtureId3, fixtureId4, fixtureId5, fixtureId6, fixtureId7}, TEST_BUCKET_NAME);
 	}
 	
@@ -448,7 +454,64 @@ public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 
 	@Test
 	public void shouldGetFixturesForTeamInDivisionInSeason () {
+		// Given
+		Season season1 = dao.addSeason(SEASON_1);
+		Season season2 = dao.addSeason(SEASON_2);
 		
+		Division division1 = dao.addDivision(DIV_NAME_1);
+		Division division2 = dao.addDivision(DIV_NAME_2);
+		
+		Team team1 = dao.addTeam(TEAM_NAME_1);
+		teamId1 = team1.getTeamId();
+		Team team2 = dao.addTeam(TEAM_NAME_2);
+		teamId2 = team1.getTeamId();
+		Team team3 = dao.addTeam(TEAM_NAME_3);
+		teamId3 = team1.getTeamId();
+		Team team4 = dao.addTeam(TEAM_NAME_4);
+		teamId4 = team1.getTeamId();
+		Team team5 = dao.addTeam(TEAM_NAME_5);
+		teamId5 = team1.getTeamId();
+		Team team6 = dao.addTeam(TEAM_NAME_6);
+		teamId6 = team1.getTeamId();
+
+		Calendar fixtureDate1 = Calendar.getInstance();
+		fixtureDate1.set(Calendar.YEAR, 2003);
+		fixtureDate1.set(Calendar.MONTH, 4);
+		fixtureDate1.set(Calendar.DAY_OF_MONTH, 15);
+		Calendar fixtureDate2 = Calendar.getInstance();
+		fixtureDate2.set(Calendar.YEAR, 2003);
+		fixtureDate2.set(Calendar.MONTH, 4);
+		fixtureDate2.set(Calendar.DAY_OF_MONTH, 21);
+		Calendar fixtureDate3 = Calendar.getInstance();
+		fixtureDate3.set(Calendar.YEAR, 2070);
+		fixtureDate3.set(Calendar.MONTH, 4);
+		fixtureDate3 .set(Calendar.DAY_OF_MONTH, 21);
+		
+		Fixture fixture1 = dao.addFixture(season1, fixtureDate1, division1, team1, team2, 2, 1);
+		fixtureId1 = fixture1.getFixtureId();
+		Fixture fixture2 = dao.addFixture(season1, fixtureDate1, division2, team3, team4, 0, 1);
+		fixtureId2 = fixture2.getFixtureId();
+		Fixture fixture3 = dao.addFixture(season1, fixtureDate2, division1, team2, team1, 3, 1);
+		fixtureId3 = fixture3.getFixtureId();
+		Fixture fixture4 = dao.addFixture(season1, fixtureDate2, division2, team4, team3, 2, 2);
+		fixtureId4 = fixture4.getFixtureId();		
+		Fixture fixture5 = dao.addFixture(season1, fixtureDate2, division2, team3, team5, 3, 3);
+		fixtureId5 = fixture5.getFixtureId();		
+		Fixture fixture6 = dao.addFixture(season2, fixtureDate1, division2, team3, team6, 2, 2);
+		fixtureId6 = fixture6.getFixtureId();		
+		
+		SeasonDivision seasonDivision = new SeasonDivisionImpl ();
+		seasonDivision.setSeason(season1);
+		seasonDivision.setDivision(division2);
+		
+		// When
+		List<Fixture> fixtures = dao.getFixturesForTeamInDivisionInSeason(seasonDivision, team3);
+		
+		// Then
+		assertEquals (3, fixtures.size());
+		assertEquals (fixtureId2, fixtures.get(0).getFixtureId());
+		assertEquals (fixtureId5, fixtures.get(1).getFixtureId());
+		assertEquals (fixtureId4, fixtures.get(2).getFixtureId());
 	}
 
 	@Test

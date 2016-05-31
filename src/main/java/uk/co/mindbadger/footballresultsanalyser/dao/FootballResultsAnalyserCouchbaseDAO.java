@@ -631,9 +631,43 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	}
 
 	@Override
-	public List<Fixture> getFixturesForTeamInDivisionInSeason(SeasonDivision arg0, Team arg1) {
-		//TODO Implement this method
-		throw new RuntimeException("This method is not yet implememented");
+	public List<Fixture> getFixturesForTeamInDivisionInSeason(SeasonDivision seasonDivision, Team team) {
+		List<Fixture> fixtures = new ArrayList<Fixture> ();
+		
+		JsonArray jsonFromArrayKey = JsonArray.empty();
+		jsonFromArrayKey.add(seasonDivision.getSeason().getSeasonNumber());
+		jsonFromArrayKey.add(seasonDivision.getDivision().getDivisionId());
+		jsonFromArrayKey.add(team.getTeamId());
+
+		JsonArray jsonToArrayKey = JsonArray.empty();
+		jsonToArrayKey.add(seasonDivision.getSeason().getSeasonNumber());
+		jsonToArrayKey.add(seasonDivision.getDivision().getDivisionId());
+		jsonToArrayKey.add(team.getTeamId());
+		jsonToArrayKey.add("\u0fff");
+
+		ViewResult result = bucket.query(ViewQuery.from("fixture", "unique").startKey(jsonFromArrayKey)
+				.endKey(jsonToArrayKey).stale(Stale.FALSE));
+		
+		for (ViewRow row : result.allRows()) {
+			String key = (String) row.id();
+			JsonDocument doc = bucket.get(key);
+			JsonObject teamRow = doc.content();
+			Fixture fixture = mapJsonToFixture (teamRow);
+			fixtures.add(fixture);
+		}
+		
+		result = bucket.query(ViewQuery.from("fixture", "unique_away_home").startKey(jsonFromArrayKey)
+				.endKey(jsonToArrayKey).stale(Stale.FALSE));
+
+		for (ViewRow row : result.allRows()) {
+			String key = (String) row.id();
+			JsonDocument doc = bucket.get(key);
+			JsonObject teamRow = doc.content();
+			Fixture fixture = mapJsonToFixture (teamRow);
+			fixtures.add(fixture);
+		}
+
+		return fixtures;
 	}
 	
 	/* ****************** UTILS, GETTERS & SETTERS ****************** */
