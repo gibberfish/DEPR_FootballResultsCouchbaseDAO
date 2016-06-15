@@ -1,4 +1,4 @@
-package uk.co.mindbadger.footballresultsanalyser.domain;
+package mindbadger.footballresultsanalyser.domain;
 
 public class DivisionImpl implements Division {
 

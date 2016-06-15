@@ -1,4 +1,4 @@
-package uk.co.mindbadger.footballresultsanalyser.dao;
+package mindbadger.footballresultsanalyser.dao;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;

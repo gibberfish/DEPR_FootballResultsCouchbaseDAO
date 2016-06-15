@@ -1,4 +1,4 @@
-package uk.co.mindbadger.footballresultsanalyser.dao;
+package mindbadger.footballresultsanalyser.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -14,16 +14,16 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import uk.co.mindbadger.footballresultsanalyser.domain.Division;
-import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
-import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactoryImpl;
-import uk.co.mindbadger.footballresultsanalyser.domain.Fixture;
-import uk.co.mindbadger.footballresultsanalyser.domain.Season;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivision;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionImpl;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionTeamImpl;
-import uk.co.mindbadger.footballresultsanalyser.domain.Team;
+import mindbadger.footballresultsanalyser.domain.Division;
+import mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
+import mindbadger.footballresultsanalyser.domain.DomainObjectFactoryImpl;
+import mindbadger.footballresultsanalyser.domain.Fixture;
+import mindbadger.footballresultsanalyser.domain.Season;
+import mindbadger.footballresultsanalyser.domain.SeasonDivision;
+import mindbadger.footballresultsanalyser.domain.SeasonDivisionImpl;
+import mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
+import mindbadger.footballresultsanalyser.domain.SeasonDivisionTeamImpl;
+import mindbadger.footballresultsanalyser.domain.Team;
 
 public class FootballResultsAnalyserCouchbaseDAOFixtureTest {
 

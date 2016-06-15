@@ -1,4 +1,4 @@
-package uk.co.mindbadger.footballresultsanalyser.domain;
+package mindbadger.footballresultsanalyser.domain;
 
 public class TeamImpl implements Team {
 	private static final long serialVersionUID = -27435360384105175L;

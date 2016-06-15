@@ -1,4 +1,4 @@
-package uk.co.mindbadger.footballresultsanalyser.domain;
+package mindbadger.footballresultsanalyser.domain;
 
 public class SeasonImpl implements Season {
 	private static final long serialVersionUID = 1965225871957347148L;

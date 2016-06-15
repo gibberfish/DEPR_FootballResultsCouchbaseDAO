@@ -1,4 +1,4 @@
-package uk.co.mindbadger.footballresultsanalyser.dao;
+package mindbadger.footballresultsanalyser.dao;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
@@ -11,9 +11,9 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import uk.co.mindbadger.footballresultsanalyser.domain.Division;
-import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
-import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactoryImpl;
+import mindbadger.footballresultsanalyser.domain.Division;
+import mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
+import mindbadger.footballresultsanalyser.domain.DomainObjectFactoryImpl;
 
 public class FootballResultsAnalyserCouchbaseDAODivisionTest {
 	private FootballResultsAnalyserCouchbaseDAO dao;

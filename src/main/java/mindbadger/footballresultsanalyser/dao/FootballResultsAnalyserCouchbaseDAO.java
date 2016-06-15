@@ -1,4 +1,4 @@
-package uk.co.mindbadger.footballresultsanalyser.dao;
+package mindbadger.footballresultsanalyser.dao;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -10,13 +10,13 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 
-import uk.co.mindbadger.footballresultsanalyser.domain.Division;
-import uk.co.mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
-import uk.co.mindbadger.footballresultsanalyser.domain.Fixture;
-import uk.co.mindbadger.footballresultsanalyser.domain.Season;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivision;
-import uk.co.mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
-import uk.co.mindbadger.footballresultsanalyser.domain.Team;
+import mindbadger.footballresultsanalyser.domain.Division;
+import mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
+import mindbadger.footballresultsanalyser.domain.Fixture;
+import mindbadger.footballresultsanalyser.domain.Season;
+import mindbadger.footballresultsanalyser.domain.SeasonDivision;
+import mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
+import mindbadger.footballresultsanalyser.domain.Team;
 
 import com.couchbase.client.java.Bucket;
 import com.couchbase.client.java.Cluster;
