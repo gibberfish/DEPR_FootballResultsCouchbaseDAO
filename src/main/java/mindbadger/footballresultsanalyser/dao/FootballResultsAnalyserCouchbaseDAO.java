@@ -432,20 +432,26 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		fixtureObject.setDivision(division);
 		
 		String fixtureDateString = jsonFixture.getString("fixtureDate");
-		SimpleDateFormat niceSdf = new SimpleDateFormat("dd/MM/yyyy");
-		Integer homeGoals = jsonFixture.getInt("homeGoals");
-		Integer awayGoals = jsonFixture.getInt("awayGoals");
-		
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		SimpleDateFormat alternativeDateFormat = new SimpleDateFormat("dd/MM/yyyy");
 		if (fixtureDateString != null) {
 			Calendar fixtureDate = Calendar.getInstance();
 			try {
-				fixtureDate.setTime(niceSdf.parse(fixtureDateString));
+				fixtureDate.setTime(dateFormat.parse(fixtureDateString));
 				fixtureObject.setFixtureDate(fixtureDate);
-			} catch (ParseException e) {
-				e.printStackTrace();
-				throw new RuntimeException (e);
+			} catch (ParseException e1) {
+				try {
+					fixtureDate.setTime(alternativeDateFormat.parse(fixtureDateString));
+					fixtureObject.setFixtureDate(fixtureDate);
+				}  catch (ParseException e) {
+					e.printStackTrace();
+					throw new RuntimeException (e);
+				}
 			}
 		}
+		
+		Integer awayGoals = jsonFixture.getInt("awayGoals");
+		Integer homeGoals = jsonFixture.getInt("homeGoals");
 		
 		if (homeGoals != null) {
 			fixtureObject.setHomeGoals(homeGoals);
@@ -507,7 +513,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 				;
 		
 		if (fixtureDate != null) {			
-			SimpleDateFormat niceSdf = new SimpleDateFormat("dd/MM/yyyy");
+			SimpleDateFormat niceSdf = new SimpleDateFormat("yyyy-MM-dd");
 			String fixtureDateAsString = niceSdf.format(fixtureDate.getTime());
 			fixture.put("fixtureDate", fixtureDateAsString);
 		} else {
