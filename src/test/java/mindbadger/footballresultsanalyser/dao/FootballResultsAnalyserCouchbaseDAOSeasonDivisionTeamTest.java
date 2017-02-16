@@ -16,6 +16,7 @@ import mindbadger.footballresultsanalyser.domain.Season;
 import mindbadger.footballresultsanalyser.domain.SeasonDivision;
 import mindbadger.footballresultsanalyser.domain.SeasonDivisionTeam;
 import mindbadger.footballresultsanalyser.domain.Team;
+import mindbadger.footballresultsanalyser.repository.JsonMapper;
 
 public class FootballResultsAnalyserCouchbaseDAOSeasonDivisionTeamTest {
 
@@ -51,6 +52,9 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonDivisionTeamTest {
 		dao.setDomainObjectFactory(domainObjectFactory);
 		dao.setBucketName("footballTest");
 		
+		JsonMapper mapper = new JsonMapper();
+		dao.jsonMapper = mapper;
+
 		dao.startSession();
 	}
 

@@ -14,6 +14,7 @@ import org.junit.Test;
 import mindbadger.footballresultsanalyser.domain.Division;
 import mindbadger.footballresultsanalyser.domain.DomainObjectFactory;
 import mindbadger.footballresultsanalyser.domain.DomainObjectFactoryImpl;
+import mindbadger.footballresultsanalyser.repository.JsonMapper;
 
 public class FootballResultsAnalyserCouchbaseDAODivisionTest {
 	private FootballResultsAnalyserCouchbaseDAO dao;
@@ -37,6 +38,9 @@ public class FootballResultsAnalyserCouchbaseDAODivisionTest {
 	public void setup () {
 		dao = new FootballResultsAnalyserCouchbaseDAO ();
 		domainObjectFactory = new DomainObjectFactoryImpl();
+		
+		JsonMapper mapper = new JsonMapper();
+		dao.jsonMapper = mapper;
 		
 		dao.setDomainObjectFactory(domainObjectFactory);
 		dao.setBucketName("footballTest");

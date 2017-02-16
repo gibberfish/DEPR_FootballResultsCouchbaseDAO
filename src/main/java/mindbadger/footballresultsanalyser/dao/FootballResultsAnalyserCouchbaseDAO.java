@@ -43,7 +43,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 	private DomainObjectFactory domainObjectFactory;
 	
 	@Autowired
-	private JsonMapper jsonMapper;
+	JsonMapper jsonMapper;
 	
 	private Cluster cluster;
 	private Bucket bucket;
@@ -147,6 +147,7 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		
 		JsonDocument doc = JsonDocument.create(generateCouchbaseDivisionKey(newId.toString()), division);
 		bucket.upsert(doc);
+		System.out.println("+++++++++++++++++++++++++++++++++++++++++" + jsonMapper);
 		return jsonMapper.mapJsonToDivision(doc.content());
 	}
 	
