@@ -147,7 +147,6 @@ public class FootballResultsAnalyserCouchbaseDAO implements FootballResultsAnaly
 		
 		JsonDocument doc = JsonDocument.create(generateCouchbaseDivisionKey(newId.toString()), division);
 		bucket.upsert(doc);
-		System.out.println("+++++++++++++++++++++++++++++++++++++++++" + jsonMapper);
 		return jsonMapper.mapJsonToDivision(doc.content());
 	}
 	

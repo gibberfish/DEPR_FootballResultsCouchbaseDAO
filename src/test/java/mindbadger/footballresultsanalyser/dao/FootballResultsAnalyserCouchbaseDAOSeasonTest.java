@@ -41,6 +41,9 @@ public class FootballResultsAnalyserCouchbaseDAOSeasonTest {
 		
 		JsonMapper mapper = new JsonMapper();
 		dao.jsonMapper = mapper;
+		mapper.setDao(dao);
+		DomainObjectFactory dof = new DomainObjectFactoryImpl();
+		mapper.setDomainObjectFactory(dof);
 
 		dao.startSession();
 	}

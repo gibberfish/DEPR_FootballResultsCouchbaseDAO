@@ -86,4 +86,12 @@ public class JsonMapper {
 		return fixtureObject;
 	}
 
+	public void setDao(FootballResultsAnalyserDAO dao) {
+		this.dao = dao;
+	}
+
+	public void setDomainObjectFactory(DomainObjectFactory domainObjectFactory) {
+		this.domainObjectFactory = domainObjectFactory;
+	}
+
 }
